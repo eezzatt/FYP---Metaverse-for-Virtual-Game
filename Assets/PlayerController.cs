@@ -1,33 +1,59 @@
 using UnityEngine;
-using System.IO;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    private Vector3 lastPosition;
+    public float turnSpeed = 150f;
+    public float jumpForce = 5f; // Jump strength
     private int score = 0;
+    private Vector3 lastPosition;
 
     private DataLogger logger;
+    private Rigidbody rb;
+    private bool isGrounded;
 
     private void Start()
     {
         lastPosition = transform.position;
-        logger = FindFirstObjectByType<DataLogger>(); // or assign via Inspector
+        logger = FindFirstObjectByType<DataLogger>();
         logger.Log("Start", transform.position, score);
+        rb = GetComponent<Rigidbody>(); // get Rigidbody component
     }
 
     private void Update()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-        Vector3 move = new Vector3(moveX, 0f, moveZ);
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
-        transform.Translate(move * moveSpeed * Time.deltaTime, Space.World);
+        // 1. Rotate player left/right
+        if (horizontal != 0f)
+            transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
 
-        if (move != Vector3.zero && Vector3.Distance(transform.position, lastPosition) > 0.1f)
+        // 2. Move forward/back relative to player
+        Vector3 forwardMovement = transform.forward * vertical * moveSpeed * Time.deltaTime;
+        transform.position += forwardMovement;
+
+        // 3. Jump
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false; // player is now in air
+        }
+
+        // 4. Logging
+        if (Vector3.Distance(transform.position, lastPosition) > 0.1f)
         {
             logger.Log("Move", transform.position, score);
             lastPosition = transform.position;
+        }
+    }
+
+    // Check if player is on the ground
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
         }
     }
 
