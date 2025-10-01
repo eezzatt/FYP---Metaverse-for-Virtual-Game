@@ -4,7 +4,7 @@ public class ThirdPersonCamera : MonoBehaviour
 {
     public Transform target;
     public Vector3 offset = new Vector3(0, 1, -5);
-    public float rotationSpeed = 2f;   // drag sensitivity
+    public float rotationSpeed = 15f;   // drag sensitivity
     public float returnSpeed = 2f;     // how fast it snaps back
 
     private float yaw = 0f;
