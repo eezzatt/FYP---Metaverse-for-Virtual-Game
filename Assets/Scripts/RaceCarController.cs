@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class RaceCarController : MonoBehaviour
 {
-    public float accelerationSpeed = 5f;
-    public float maxSpeed =5f;  // Reduced from 30f
+    public float accelerationSpeed = 20f;
+    public float maxSpeed = 20f;  // Reduced from 30f
     public float turnSpeed = 100f;
     public float brakeForce = 10f;
     
@@ -13,6 +13,8 @@ public class RaceCarController : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 
     private void FixedUpdate()
@@ -34,7 +36,7 @@ public class RaceCarController : MonoBehaviour
         // Natural slowdown
         else
         {
-            currentSpeed = Mathf.Max(currentSpeed - 2f * Time.fixedDeltaTime, 0);
+            currentSpeed = Mathf.Max(currentSpeed - 5f * Time.fixedDeltaTime, 0);
         }
         
         // Move forward
