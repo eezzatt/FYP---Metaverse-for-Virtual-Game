@@ -8,24 +8,28 @@ public class PlayerController : MonoBehaviour
     private int score = 0;
     private Vector3 lastPosition;
 
-    private DataLogger logger;
+    private DataLogger logger; // Now optional
     private Rigidbody rb;
     private bool isGrounded;
 
     private void Start()
     {
         lastPosition = transform.position;
+        
+        // Try to find logger, but don't require it
         logger = FindFirstObjectByType<DataLogger>();
-        logger.Log("Start", transform.position, score);
+        if (logger != null)
+        {
+            logger.Log("Start", transform.position, score);
+        }
+        
         rb = GetComponent<Rigidbody>();
         
-        // FORCE constraints - clear first then set
         rb.constraints = RigidbodyConstraints.None;
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         
         Debug.Log($"Rigidbody constraints applied: {rb.constraints}");
         
-        // Prevent enemies from physically pushing the player
         IgnoreEnemyCollisions();
     }
 
@@ -46,7 +50,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // Handle rotation in Update (not affected by physics collisions)
         float horizontal = Input.GetAxis("Horizontal");
         if (horizontal != 0f)
         {
@@ -54,21 +57,19 @@ public class PlayerController : MonoBehaviour
             transform.Rotate(Vector3.up, turnAmount);
         }
 
-        // Handle jump
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
 
-        // Re-check for new enemies spawned during gameplay
         if (Time.frameCount % 60 == 0)
         {
             IgnoreEnemyCollisions();
         }
 
-        // Logging
-        if (Vector3.Distance(transform.position, lastPosition) > 0.1f)
+        // Only log if logger exists
+        if (logger != null && Vector3.Distance(transform.position, lastPosition) > 0.1f)
         {
             logger.Log("Move", transform.position, score);
             lastPosition = transform.position;
@@ -79,7 +80,6 @@ public class PlayerController : MonoBehaviour
     {
         float vertical = Input.GetAxis("Vertical");
 
-        // Move forward/back using Rigidbody
         if (vertical != 0f)
         {
             Vector3 forwardMovement = transform.forward * vertical * moveSpeed * Time.fixedDeltaTime;
@@ -87,29 +87,20 @@ public class PlayerController : MonoBehaviour
             rb.MovePosition(newPosition);
         }
         
-        // Force upright after physics
         ForceUpright();
     }
 
     private void ForceUpright()
     {
-        // Get current rotation
         Vector3 euler = transform.eulerAngles;
         
-        // Normalize angles to -180 to 180 range for easier checking
         float normalizedX = euler.x > 180 ? euler.x - 360 : euler.x;
         float normalizedZ = euler.z > 180 ? euler.z - 360 : euler.z;
         
-        // If there's ANY tilt on X or Z axis, smoothly correct it
         if (Mathf.Abs(normalizedX) > 0.01f || Mathf.Abs(normalizedZ) > 0.01f)
         {
-            // Target rotation (keep Y, zero out X and Z)
             Quaternion targetRotation = Quaternion.Euler(0f, euler.y, 0f);
-            
-            // Smoothly interpolate from current to target (adjust speed with the multiplier)
             Quaternion smoothRotation = Quaternion.Slerp(rb.rotation, targetRotation, Time.fixedDeltaTime * 10f);
-            
-            // Apply smoothly to Rigidbody
             rb.rotation = smoothRotation;
         }
     }
@@ -128,7 +119,12 @@ public class PlayerController : MonoBehaviour
         {
             score++;
             Destroy(other.gameObject);
-            logger.Log("Collect", transform.position, score);
+            
+            // Only log if logger exists
+            if (logger != null)
+            {
+                logger.Log("Collect", transform.position, score);
+            }
         }
     }
 }
