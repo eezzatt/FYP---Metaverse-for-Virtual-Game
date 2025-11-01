@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 18900
+  controlID: 26782
   draggingID: 0
 --- !u!114 &2
 MonoBehaviour:
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 18853
+  controlID: 26736
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -180,7 +180,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 18837
+  controlID: 26720
   draggingID: 0
 --- !u!114 &5
 MonoBehaviour:
@@ -246,10 +246,10 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 48}
+      scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: f8afffff20fbffffc0a7000032a80000
+      m_ExpandedIDs: 62c3feff86c4fefff8afffff20fbffffc0a7000032a80000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -699,9 +699,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 0, y: 1.0000002, z: -15.5}
+    m_Target: {x: 0, y: 12.5, z: 25.5}
     speed: 2
-    m_Value: {x: 0, y: 1.0000002, z: -15.5}
+    m_Value: {x: 0, y: 12.5, z: 25.5}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -747,20 +747,20 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.3513302, y: 0.3329564, z: -0.13493612, w: -0.86470735}
+    m_Target: {x: 0.09959556, y: 0.6929527, z: -0.0974957, w: 0.7075499}
     speed: 2
-    m_Value: {x: -0.35129166, y: 0.3329199, z: -0.13492133, w: -0.8646125}
+    m_Value: {x: 0.09958386, y: 0.6928713, z: -0.09748424, w: 0.7074668}
   m_Size:
-    m_Target: 52.097187
+    m_Target: 27.955322
     speed: 2
-    m_Value: 52.097187
+    m_Value: 27.955322
   m_Ortho:
     m_Target: 1
     speed: 2
     m_Value: 1
   m_CameraSettings:
-    m_Speed: 1.4977514
-    m_SpeedNormalized: 0.74875003
+    m_Speed: 1.4917543
+    m_SpeedNormalized: 0.74575
     m_SpeedMin: 0.001
     m_SpeedMax: 2
     m_EasingEnabled: 1
@@ -878,8 +878,8 @@ MonoBehaviour:
     y: 339.33334
     width: 978
     height: 233.99997
-  m_MinSize: {x: 230, y: 250}
-  m_MaxSize: {x: 10000, y: 10000}
+  m_MinSize: {x: 231, y: 276}
+  m_MaxSize: {x: 10001, y: 10026}
   m_ActualView: {fileID: 11}
   m_Panes:
   - {fileID: 11}
@@ -933,7 +933,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Materials
+    - Assets/Scripts
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -943,15 +943,15 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Materials
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\Admin\Documents\FYP - Metaverse for Virtual Game
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 79}
-    m_SelectedIDs: 2ab80000
-    m_LastClickedID: 47146
+    scrollPos: {x: 0, y: 55.49994}
+    m_SelectedIDs: 5caa0000
+    m_LastClickedID: 43612
     m_ExpandedIDs: 0000000082a8000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
