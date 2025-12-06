@@ -7,21 +7,12 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 5f;
     private int score = 0;
     private Vector3 lastPosition;
-
-    private DataLogger logger; // Now optional
     private Rigidbody rb;
     private bool isGrounded;
 
     private void Start()
     {
         lastPosition = transform.position;
-        
-        // Try to find logger, but don't require it
-        logger = FindFirstObjectByType<DataLogger>();
-        if (logger != null)
-        {
-            logger.Log("Start", transform.position, score);
-        }
         
         rb = GetComponent<Rigidbody>();
         
@@ -66,13 +57,6 @@ public class PlayerController : MonoBehaviour
         if (Time.frameCount % 60 == 0)
         {
             IgnoreEnemyCollisions();
-        }
-
-        // Only log if logger exists
-        if (logger != null && Vector3.Distance(transform.position, lastPosition) > 0.1f)
-        {
-            logger.Log("Move", transform.position, score);
-            lastPosition = transform.position;
         }
     }
 
@@ -119,12 +103,6 @@ public class PlayerController : MonoBehaviour
         {
             score++;
             Destroy(other.gameObject);
-            
-            // Only log if logger exists
-            if (logger != null)
-            {
-                logger.Log("Collect", transform.position, score);
-            }
         }
     }
 }
