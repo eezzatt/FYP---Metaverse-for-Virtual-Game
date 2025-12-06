@@ -13,8 +13,15 @@ public class RaceCarController : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        
+        // FIXED: Use correct API for Unity version
+        #if UNITY_2023_1_OR_NEWER
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+        #else
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        #endif
     }
 
     private void FixedUpdate()
@@ -22,7 +29,7 @@ public class RaceCarController : MonoBehaviour
         // Get input
         float moveInput = Input.GetAxis("Vertical");
         float turnInput = Input.GetAxis("Horizontal");
-        
+
         // Acceleration
         if (moveInput > 0)
         {
@@ -38,11 +45,11 @@ public class RaceCarController : MonoBehaviour
         {
             currentSpeed = Mathf.Max(currentSpeed - 5f * Time.fixedDeltaTime, 0);
         }
-        
+
         // Move forward
         Vector3 forwardMovement = transform.forward * currentSpeed * Time.fixedDeltaTime;
         rb.MovePosition(rb.position + forwardMovement);
-        
+
         // Turn (only when moving)
         if (currentSpeed > 0.1f && turnInput != 0)
         {
@@ -50,11 +57,28 @@ public class RaceCarController : MonoBehaviour
             Quaternion turnRotation = Quaternion.Euler(0f, turnAmount, 0f);
             rb.MoveRotation(rb.rotation * turnRotation);
         }
-        
-        // NEW: Prevent tunneling by clamping velocity
+
+        // FIXED: Prevent tunneling by clamping velocity (Unity version compatible)
+        #if UNITY_2023_1_OR_NEWER
         if (rb.linearVelocity.magnitude > maxSpeed)
         {
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+        }
+        #else
+        if (rb.velocity.magnitude > maxSpeed)
+        {
+            rb.velocity = rb.velocity.normalized * maxSpeed;
+        }
+        #endif
+    }
+    
+    void OnCollisionEnter(Collision collision)
+    {
+        // FIXED: Use FindObjectOfType instead of FindFirstObjectByType
+        RacingGameSession session = FindFirstObjectByType<RacingGameSession>();
+        if (session != null)
+        {
+            session.OnCollision(collision);
         }
     }
 }

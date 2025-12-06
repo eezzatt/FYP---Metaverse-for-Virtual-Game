@@ -1,0 +1,3 @@
+SessionID,PlayerID,GameType,DifficultyLevel,SessionDuration,Score,Deaths,Completed,Timestamp,lapsCompleted,bestLapTime,avgLapTime,totalRaceTime,collisions,checkpointsPassed,maxSpeed,avgSpeed,consistency,offTrackTime,victory,combosExecuted,perfectDodges,hitsLanded,enemyHitsTaken,playerAccuracy,avgReactionTime
+1c3d0781-f4bb-49b6-b41e-4cf120402587,Player1,Racing,Easy,6.09,0,1,False,2025-12-04 18:05:03,0,0,0,6.090769,2,0,0.7653761,0.02126142,1,0,,,,,,,
+1fbd572d-c0b5-404d-829a-54ed4ab93d34,Player1,Fighting,Medium,12.92,1657,0,True,2025-12-04 18:06:27,,,,,,,,,,,True,0,0,5,6,0.7142857,0
