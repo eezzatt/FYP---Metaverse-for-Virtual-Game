@@ -1,3 +1,12 @@
-SessionID,PlayerID,GameType,DifficultyLevel,SessionDuration,Score,Deaths,Completed,Timestamp,lapsCompleted,bestLapTime,avgLapTime,totalRaceTime,collisions,checkpointsPassed,maxSpeed,avgSpeed,consistency,offTrackTime,victory,combosExecuted,perfectDodges,hitsLanded,enemyHitsTaken,playerAccuracy,avgReactionTime
-1c3d0781-f4bb-49b6-b41e-4cf120402587,Player1,Racing,Easy,6.09,0,1,False,2025-12-04 18:05:03,0,0,0,6.090769,2,0,0.7653761,0.02126142,1,0,,,,,,,
-1fbd572d-c0b5-404d-829a-54ed4ab93d34,Player1,Fighting,Medium,12.92,1657,0,True,2025-12-04 18:06:27,,,,,,,,,,,True,0,0,5,6,0.7142857,0
+SessionID,PlayerID,GameType,DifficultyLevel,SessionDuration,Score,Deaths,Completed,Timestamp,victory,combosExecuted,perfectDodges,hitsDealt,hitsTaken,playerAccuracy,avgReactionTime,lapsCompleted,bestLapTime,avgLapTime,totalRaceTime,collisions,checkpointsPassed,maxSpeed,avgSpeed,consistency,offTrackTime
+9a79ec2a-0313-4410-a442-50e826034025,Player1,Fighting,Medium,12.76,2050,0,True,2025-12-11 15:04:48,True,3,1,5,0,1,2.557425,,,,,,,,,,
+871c3989-cd76-44a4-8464-ada14948581a,Player1,Fighting,Medium,14.44,567,1,False,2025-12-11 15:06:16,False,0,1,1,1,0.3333333,1.693825,,,,,,,,,,
+bff56b89-499c-493d-bf25-158675e44461,Player1,Fighting,Medium,44.82,150,1,True,2025-12-11 15:07:25,False,0,0,0,7,0,0,,,,,,,,,,
+6ab197ac-377b-4b7c-a973-98ec04231b30,Player1,Fighting,Medium,13.73,1907,0,True,2025-12-11 19:16:08,True,3,1,5,0,0.7142857,1.34066,,,,,,,,,,
+77e39109-9217-437e-a095-980858897e0e,Player1,Racing,Easy,5.62,1400,0,True,2025-12-11 21:11:39,,,,,,,,1,5.619581,5.619581,5.619581,2,2,0.0004004918,0.0001126877,1,0
+1e36626e-814e-46aa-87f0-99bda27ce1f4,Player1,Racing,Easy,6.18,1500,0,True,2025-12-11 21:47:25,,,,,,,,1,6.177666,6.177666,6.177666,0,2,0.0004126772,0.0001082782,1,0
+7fcb0c55-bc29-46a4-9e4e-422a1756d15b,Player1,Racing,Easy,2.60,1500,0,True,2025-12-11 21:48:16,,,,,,,,1,2.597136,2.597136,2.597136,0,2,0.0003502791,6.881938E-05,1,0
+f39acdc0-b4af-4bbc-a36c-c6a6bf7fefc5,Player1,Racing,Easy,2.18,0,1,False,2025-12-11 21:48:40,,,,,,,,0,0,0,2.18491,0,0,9.908289,3.956306,1,0
+41a610c2-7a5c-42be-ab8a-3470b0f2a285,Player1,Racing,Easy,2.90,0,1,False,2025-12-11 21:48:53,,,,,,,,0,0,0,2.895984,0,0,11.15729,4.104518,1,0
+7ecd0c26-b898-463d-8f55-81fa6afef9a1,Player1,Racing,Easy,6.12,0,1,False,2025-12-11 21:49:08,,,,,,,,0,0,0,6.115112,0,0,11.53014,2.165551,1,0
+e6c6a840-e216-482b-9104-4328a69a4d1d,Player1,Racing,Easy,12.14,0,1,False,2025-12-11 21:49:33,,,,,,,,0,0,0,12.1362,0,0,12.55277,1.299307,1,0

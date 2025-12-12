@@ -739,7 +739,7 @@ Light:
   serializedVersion: 11
   m_Type: 1
   m_Color: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
-  m_Intensity: 200
+  m_Intensity: 20
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -808,6 +808,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &559929788
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 559929790}
+  - component: {fileID: 559929789}
+  m_Layer: 0
+  m_Name: EnvironmentManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &559929789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 559929788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64223027a0aebdb48918f08824bb2efe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &559929790
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 559929788}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &631204431
 GameObject:
   m_ObjectHideFlags: 0
@@ -959,6 +1003,7 @@ GameObject:
   - component: {fileID: 749930557}
   - component: {fileID: 749930556}
   - component: {fileID: 749930558}
+  - component: {fileID: 749930559}
   m_Layer: 3
   m_Name: Enemy
   m_TagString: Enemy
@@ -1079,6 +1124,8 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
+  attackWindupDuration: 5
+  attackRecoveryDuration: 0.5
 --- !u!54 &749930557
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1087,9 +1134,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 749930551}
   serializedVersion: 4
-  m_Mass: 5
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Mass: 3
+  m_Drag: 2
+  m_AngularDrag: 50
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1099,12 +1146,12 @@ Rigidbody:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_ImplicitCom: 1
+  m_ImplicitCom: 0
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!114 &749930558
 MonoBehaviour:
@@ -1123,6 +1170,22 @@ MonoBehaviour:
   healthBarFill: {fileID: 0}
   fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &749930559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 749930551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 062e621f0d980a94888bb8df547668a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skinColor: {r: 1, g: 0.8, b: 0.6, a: 1}
+  shirtColor: {r: 0.27672952, g: 0, b: 0, a: 1}
+  pantsColor: {r: 0, g: 0, b: 0, a: 1}
+  buildOnStart: 1
 --- !u!1 &793861178
 GameObject:
   m_ObjectHideFlags: 0
@@ -2022,6 +2085,7 @@ MonoBehaviour:
   currentDifficulty: 1
   player: {fileID: 1334799095}
   enemy: {fileID: 749930551}
+  perfectDodgeWindow: 5
 --- !u!4 &1294638125
 Transform:
   m_ObjectHideFlags: 0
@@ -2053,6 +2117,7 @@ GameObject:
   - component: {fileID: 1334799097}
   - component: {fileID: 1334799103}
   - component: {fileID: 1334799104}
+  - component: {fileID: 1334799105}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2068,7 +2133,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1334799095}
   serializedVersion: 4
-  m_Mass: 5
+  m_Mass: 3
   m_Drag: 2
   m_AngularDrag: 50
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -2212,7 +2277,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   attackDamage: 20
-  attackCooldown: 1
+  attackCooldown: 0.3
+  dodgeDuration: 0.3
+  dodgeCooldown: 1
+  dodgeDistance: 3
 --- !u!114 &1334799104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2230,6 +2298,22 @@ MonoBehaviour:
   healthBarFill: {fileID: 0}
   fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1334799105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334799095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 062e621f0d980a94888bb8df547668a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skinColor: {r: 1, g: 0.8, b: 0.6, a: 1}
+  shirtColor: {r: 0, g: 0, b: 1, a: 1}
+  pantsColor: {r: 0.2, g: 0.4, b: 0.2, a: 1}
+  buildOnStart: 1
 --- !u!1 &1446250849
 GameObject:
   m_ObjectHideFlags: 0
@@ -2666,3 +2750,4 @@ SceneRoots:
   - {fileID: 86079387}
   - {fileID: 458240850}
   - {fileID: 1294638125}
+  - {fileID: 559929790}
