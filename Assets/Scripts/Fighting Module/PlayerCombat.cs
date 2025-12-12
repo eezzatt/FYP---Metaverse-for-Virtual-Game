@@ -2,35 +2,56 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
+    [Header("Attack Settings")]
     public Transform attackPoint;
     public float attackRange = 1.5f;
     public LayerMask enemyLayers;
     public int attackDamage = 10;
     public float attackCooldown = 0.5f;
     
-    [Header("Attack Visual Feedback")]
-    public GameObject attackVisualPrefab; // Optional: assign a particle effect
-    public float attackAnimationDuration = 0.2f;
+    [Header("Dodge Settings")]
+    public float dodgeDuration = 0.3f;
+    public float dodgeCooldown = 1f;
+    public float dodgeDistance = 3f;
     
     private float nextAttackTime = 0f;
+    private float nextDodgeTime = 0f;
+    private bool isDodging = false;
     private FightingGameSession gameSession;
-    private bool isAttacking = false;
-    private Vector3 originalScale;
+    private Rigidbody rb;
+    
+    // Combo tracking
+    private int currentCombo = 0;
+    private float lastHitTime = 0f;
+    private float comboResetTime = 2f; // Reset combo if no hit for 2 seconds
+    private int comboThreshold = 2  ; // Minimum hits to count as combo
 
     void Start()
     {
         gameSession = FindFirstObjectByType<FightingGameSession>();
-        originalScale = transform.localScale;
+        rb = GetComponent<Rigidbody>();
         
         if (gameSession == null)
         {
             Debug.LogWarning("PlayerCombat: No FightingGameSession found in scene");
         }
+        
+        if (rb == null)
+        {
+            Debug.LogWarning("PlayerCombat: No Rigidbody found - dodge mechanic won't work properly");
+        }
     }
 
     void Update()
     {
-        if (Time.time >= nextAttackTime)
+        // Reset combo if too much time has passed
+        if (currentCombo > 0 && Time.time - lastHitTime > comboResetTime)
+        {
+            ResetCombo();
+        }
+        
+        // Attack input
+        if (Time.time >= nextAttackTime && !isDodging)
         {
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
@@ -38,24 +59,25 @@ public class PlayerCombat : MonoBehaviour
                 nextAttackTime = Time.time + attackCooldown;
             }
         }
+        
+        // Dodge input - Note: Changed to LeftShift so it doesn't conflict with jump
+        if (Input.GetKeyDown(KeyCode.V))
+        {   
+            if (Time.time >= nextDodgeTime)
+            {
+                StartDodge();
+                nextDodgeTime = Time.time + dodgeCooldown;
+                Debug.Log("Dodge executed!");
+            }
+            else
+            {
+                Debug.Log("Dodge on cooldown");
+            }
+        }
     }
 
     void Attack()
     {
-        if (isAttacking) return;
-        
-        isAttacking = true;
-        
-        // Visual feedback: Quick punch forward motion
-        StartCoroutine(AttackAnimation());
-        
-        // Spawn visual effect if assigned
-        if (attackVisualPrefab != null && attackPoint != null)
-        {
-            GameObject effect = Instantiate(attackVisualPrefab, attackPoint.position, attackPoint.rotation);
-            Destroy(effect, 1f);
-        }
-        
         // Detect enemies in range
         Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
         
@@ -68,17 +90,21 @@ public class PlayerCombat : MonoBehaviour
             {
                 enemyHealth.TakeDamage(attackDamage);
                 hitSomething = true;
-                Debug.Log($"Hit {enemy.name} for {attackDamage} damage");
                 
-                // ADDED: Make enemy flash red when hit
-                StartCoroutine(FlashRed(enemy.gameObject));
+                // Track combo
+                currentCombo++;
+                lastHitTime = Time.time;
                 
-                // ADDED: Small knockback effect
-                Rigidbody enemyRb = enemy.GetComponent<Rigidbody>();
-                if (enemyRb != null)
+                Debug.Log($"Hit {enemy.name} for {attackDamage} damage | Combo: {currentCombo}");
+                
+                // Report combo to session if threshold reached
+                if (currentCombo >= comboThreshold)
                 {
-                    Vector3 knockbackDirection = (enemy.transform.position - transform.position).normalized;
-                    enemyRb.AddForce(knockbackDirection * 3f, ForceMode.Impulse);
+                    if (gameSession != null)
+                    {
+                        gameSession.OnComboExecuted();
+                    }
+                    Debug.Log($"COMBO x{currentCombo}!");
                 }
             }
         }
@@ -90,53 +116,55 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    System.Collections.IEnumerator AttackAnimation()
+    void StartDodge()
     {
-        // Quick forward lunge
-        float elapsed = 0f;
-        Vector3 startPos = transform.position;
-        Vector3 targetPos = startPos + transform.forward * 0.3f; // Lunge forward
+        if (rb == null) return;
         
-        // Forward motion (first half)
-        while (elapsed < attackAnimationDuration / 2)
+        isDodging = true;
+        
+        // Quick dash in movement direction (or forward if standing still)
+        Vector3 dodgeDirection = transform.forward;
+        
+        // Check for movement input
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        
+        if (horizontal != 0 || vertical != 0)
         {
-            elapsed += Time.deltaTime;
-            float t = elapsed / (attackAnimationDuration / 2);
-            transform.position = Vector3.Lerp(startPos, targetPos, t);
-            
-            // Slight scale increase for impact
-            transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.1f, t);
-            yield return null;
+            dodgeDirection = (transform.forward * vertical + transform.right * horizontal).normalized;
         }
         
-        // Return to original position (second half)
-        elapsed = 0f;
-        while (elapsed < attackAnimationDuration / 2)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / (attackAnimationDuration / 2);
-            transform.position = Vector3.Lerp(targetPos, startPos, t);
-            transform.localScale = Vector3.Lerp(originalScale * 1.1f, originalScale, t);
-            yield return null;
-        }
+        // Apply dodge force
+        rb.AddForce(dodgeDirection * dodgeDistance, ForceMode.VelocityChange);
         
-        // Ensure we're back at original state
-        transform.position = startPos;
-        transform.localScale = originalScale;
-        isAttacking = false;
+        // End dodge after duration
+        Invoke(nameof(EndDodge), dodgeDuration);
+
+        // Check for perfect dodge (if enemy was attacking recently)
+        if (gameSession != null)
+        {
+            gameSession.CheckPerfectDodge();
+        }
     }
 
-    System.Collections.IEnumerator FlashRed(GameObject target)
+    void EndDodge()
     {
-        Renderer renderer = target.GetComponent<Renderer>();
-        if (renderer == null) yield break;
-        
-        Color originalColor = renderer.material.color;
-        renderer.material.color = Color.red;
-        
-        yield return new WaitForSeconds(0.1f);
-        
-        renderer.material.color = originalColor;
+        isDodging = false;
+    }
+
+    void ResetCombo()
+    {
+        if (currentCombo > 0)
+        {
+            Debug.Log($"Combo reset at {currentCombo} hits");
+        }
+        currentCombo = 0;
+    }
+
+    // Called by Health.cs when player takes damage
+    public void OnPlayerTakeDamage()
+    {
+        ResetCombo();
     }
 
     void OnDrawGizmosSelected()

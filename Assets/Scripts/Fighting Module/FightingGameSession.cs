@@ -10,6 +10,9 @@ public class FightingGameSession : MonoBehaviour
     public GameObject player;
     public GameObject enemy;
 
+    [Header("Perfect Dodge Settings")]
+    public float perfectDodgeWindow = 2f; // Time window after enemy attack starts
+
     // Session tracking
     private SessionData sessionData;
     private float sessionStartTime;
@@ -20,10 +23,15 @@ public class FightingGameSession : MonoBehaviour
     private int playerDeaths = 0;
     private int combosExecuted = 0;
     private int perfectDodges = 0;
-    private int hitsLanded = 0;
-    private int enemyHitsTaken = 0;
+    private int hitsDealt = 0;
+    private int hitsTaken = 0;
     private int totalAttacks = 0;
     private List<float> reactionTimes = new List<float>();
+
+    // Enemy attack tracking
+    private float lastEnemyAttackTime = 0f;
+    private bool enemyIsAttacking = false;
+    private bool dodgeCounted;
 
     void Start()
     {
@@ -52,6 +60,12 @@ public class FightingGameSession : MonoBehaviour
         {
             CheckSessionEnd();
         }
+        
+        // Reset enemy attack flag after window expires
+        if (enemyIsAttacking && Time.time - lastEnemyAttackTime > perfectDodgeWindow)
+        {
+            enemyIsAttacking = false;
+        }
     }
 
     void StartSession()
@@ -79,11 +93,17 @@ public class FightingGameSession : MonoBehaviour
         if (playerHealth.IsDead() || enemyHealth.IsDead())
         {
             bool victory = enemyHealth.IsDead();
-            EndSession(victory);
+            EndSession(true, victory);
         }
     }
 
-    public void EndSession(bool victory)
+        void OnApplicationQuit()
+    {
+        if (!sessionActive || sessionEnded) return;
+        EndSession(false, false);
+    }
+
+    public void EndSession(bool completed, bool victory)
     {
         if (!sessionActive || sessionEnded) return; // Prevent multiple endings
 
@@ -92,28 +112,28 @@ public class FightingGameSession : MonoBehaviour
 
         // Calculate session metrics
         float duration = Time.time - sessionStartTime;
-        float accuracy = totalAttacks > 0 ? (float)hitsLanded / totalAttacks : 0f;
-        float avgReactionTime = reactionTimes.Count > 0 ? reactionTimes.Average() : 0f;
+        float accuracy = totalAttacks > 0 ? (float)hitsDealt / totalAttacks : 0f;
+        float avgReactionTime = reactionTimes.Count > 0 ? CalculateAverage(reactionTimes) : 0f;
 
         // Populate session data
         sessionData.sessionDuration = duration;
         sessionData.score = CalculateScore(victory, accuracy, duration);
         sessionData.deaths = victory ? 0 : 1;
-        sessionData.completed = victory;
+        sessionData.completed = completed;
 
         // Add fighting-specific data
         sessionData.gameSpecificData["victory"] = victory;
         sessionData.gameSpecificData["combosExecuted"] = combosExecuted;
         sessionData.gameSpecificData["perfectDodges"] = perfectDodges;
-        sessionData.gameSpecificData["hitsLanded"] = hitsLanded;
-        sessionData.gameSpecificData["enemyHitsTaken"] = enemyHitsTaken;
+        sessionData.gameSpecificData["hitsDealt"] = hitsDealt;
+        sessionData.gameSpecificData["hitsTaken"] = hitsTaken;
         sessionData.gameSpecificData["playerAccuracy"] = accuracy;
         sessionData.gameSpecificData["avgReactionTime"] = avgReactionTime;
 
         // Save to CSV
         GameplayDataCollector.Instance.SaveSessionData(sessionData);
 
-        Debug.Log($"Fighting Game Session ENDED - Victory: {victory} | Duration: {duration:F2}s | Accuracy: {accuracy:F2}");
+        Debug.Log($"Fighting Game Session ENDED - Victory: {victory} | Duration: {duration:F2}s | Accuracy: {accuracy:F2} | Perfect Dodges: {perfectDodges} | Combos: {combosExecuted} | Avg Reaction: {avgReactionTime:F3}s");
     }
 
     int CalculateScore(bool victory, float accuracy, float duration)
@@ -122,11 +142,24 @@ public class FightingGameSession : MonoBehaviour
         int accuracyBonus = Mathf.RoundToInt(accuracy * 500);
         int speedBonus = duration < 30 ? 300 : (duration < 60 ? 150 : 0);
         int comboBonus = combosExecuted * 50;
+        int dodgeBonus = perfectDodges * 100;
 
-        return baseScore + accuracyBonus + speedBonus + comboBonus;
+        return baseScore + accuracyBonus + speedBonus + comboBonus + dodgeBonus;
     }
 
-    // Public methods for combat tracking
+    float CalculateAverage(List<float> values)
+    {
+        if (values.Count == 0) return 0f;
+        float sum = 0f;
+        foreach (float value in values)
+        {
+            sum += value;
+        }
+        return sum / values.Count;
+    }
+
+    // ===== PUBLIC METHODS FOR COMBAT TRACKING =====
+
     public void OnPlayerAttack(bool hit)
     {
         if (!sessionActive) return;
@@ -134,26 +167,28 @@ public class FightingGameSession : MonoBehaviour
         totalAttacks++;
         if (hit)
         {
-            hitsLanded++;
+            hitsDealt++;
         }
     }
 
     public void OnPlayerHit()
     {
         if (!sessionActive) return;
-        enemyHitsTaken++;
+        hitsTaken++;
     }
 
     public void OnComboExecuted()
     {
         if (!sessionActive) return;
         combosExecuted++;
+        Debug.Log($"[SESSION] Combo recorded! Total: {combosExecuted}");
     }
 
     public void OnPerfectDodge()
     {
         if (!sessionActive) return;
         perfectDodges++;
+        Debug.Log($"[SESSION] Perfect dodge recorded! Total: {perfectDodges}");
     }
 
     public void OnPlayerDeath()
@@ -166,16 +201,37 @@ public class FightingGameSession : MonoBehaviour
     {
         if (!sessionActive) return;
         reactionTimes.Add(time);
+        Debug.Log($"[SESSION] Reaction time recorded: {time:F3}s");
     }
 
-    // ADDED: Track when enemy starts attacking (for reaction time measurement)
-    private float lastEnemyAttackTime = 0f;
-    
+    // Called when enemy starts attacking
     public void OnEnemyAttackStart()
     {
         if (!sessionActive) return;
         lastEnemyAttackTime = Time.time;
-        // Could be used to measure player reaction time if they dodge/block
+        enemyIsAttacking = true;
+        dodgeCounted = false;
+        Debug.Log("[SESSION] Enemy attack started - dodge window open!");
+    }
+
+    // Called by PlayerCombat when player dodges
+    public void CheckPerfectDodge()
+    {
+        if (!sessionActive) return;
+        
+        // Check if dodge happened during enemy attack window
+        if (enemyIsAttacking && !dodgeCounted)
+        {
+            float reactionTime = Time.time - lastEnemyAttackTime;
+            
+            if (reactionTime <= perfectDodgeWindow)
+            {
+                OnPerfectDodge();
+                RecordReactionTime(reactionTime);
+                dodgeCounted = true;
+                Debug.Log($"PERFECT DODGE! Reaction time: {reactionTime:F3}s");
+            }
+        }
     }
 }
 

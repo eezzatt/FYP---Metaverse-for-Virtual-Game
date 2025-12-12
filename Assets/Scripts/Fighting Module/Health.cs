@@ -43,9 +43,19 @@ public class Health : MonoBehaviour
         OnHealthChanged.Invoke(GetHealthPercentage());
 
         // Notify game session if this is the player
-        if (gameObject.CompareTag("Player") && gameSession != null)
+        if (gameObject.CompareTag("Player"))
         {
-            gameSession.OnPlayerHit();
+            if (gameSession != null)
+            {
+                gameSession.OnPlayerHit();
+            }
+            
+            // Reset player's combo when they take damage
+            PlayerCombat playerCombat = GetComponent<PlayerCombat>();
+            if (playerCombat != null)
+            {
+                playerCombat.OnPlayerTakeDamage();
+            }
         }
 
         if (currentHealth <= 0)

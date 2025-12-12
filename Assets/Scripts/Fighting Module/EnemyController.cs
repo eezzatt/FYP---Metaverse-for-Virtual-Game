@@ -9,7 +9,7 @@ public class EnemyController : MonoBehaviour
     public float moveSpeed = 2f;
     public float rotationSpeed = 5f;
     public float attackRange = 2f;
-    public float stoppingDistance = 1.8f; // Stop slightly before attack range
+    public float stoppingDistance = 1.8f;
     
     [Header("Combat")]
     public float attackDamage = 15f;
@@ -17,13 +17,15 @@ public class EnemyController : MonoBehaviour
     public LayerMask playerLayer;
     
     [Header("Animation")]
-    public float attackWindupDuration = 0.3f; // Time before attack lands
-    public float attackRecoveryDuration = 0.2f; // Time after attack
+    public float attackWindupDuration = 0.3f;
+    public float attackRecoveryDuration = 0.2f;
     
     private float nextAttackTime = 0f;
     private bool isAttacking = false;
     private Health playerHealth;
     private Vector3 originalScale;
+    private Coroutine currentAttackCoroutine; // Track the attack coroutine
+    private Rigidbody rb;
 
     void Start()
     {
@@ -32,10 +34,10 @@ public class EnemyController : MonoBehaviour
             playerHealth = player.GetComponent<Health>();
         }
 
-        Rigidbody enemyRb = GetComponent<Rigidbody>();
-        if (enemyRb != null)
+        rb = GetComponent<Rigidbody>();
+        if (rb != null)
         {
-            enemyRb.constraints = RigidbodyConstraints.FreezeRotationX | 
+            rb.constraints = RigidbodyConstraints.FreezeRotationX | 
                                 RigidbodyConstraints.FreezeRotationZ;
         }
         
@@ -68,7 +70,7 @@ public class EnemyController : MonoBehaviour
             // Attack if cooldown passed
             if (Time.time >= nextAttackTime && !isAttacking)
             {
-                StartCoroutine(AttackSequence());
+                currentAttackCoroutine = StartCoroutine(AttackSequence());
                 nextAttackTime = Time.time + attackCooldown;
             }
         }
@@ -85,11 +87,9 @@ public class EnemyController : MonoBehaviour
             session.OnEnemyAttackStart();
         }
         
-        // WINDUP PHASE - Telegraph the attack
+        // WINDUP PHASE
         float elapsed = 0f;
         Vector3 startPos = transform.position;
-        Color startColor = GetComponent<Renderer>()?.material.color ?? Color.white;
-        Renderer renderer = GetComponent<Renderer>();
         
         // Pull back and change color to show attack coming
         while (elapsed < attackWindupDuration)
@@ -100,12 +100,6 @@ public class EnemyController : MonoBehaviour
             // Pull back slightly
             Vector3 pullBackPos = startPos - transform.forward * 0.2f;
             transform.position = Vector3.Lerp(startPos, pullBackPos, t);
-            
-            // Flash orange/yellow to telegraph attack
-            if (renderer != null)
-            {
-                renderer.material.color = Color.Lerp(startColor, Color.yellow, Mathf.PingPong(t * 4, 1));
-            }
             
             // Scale up slightly
             transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.2f, t);
@@ -119,7 +113,7 @@ public class EnemyController : MonoBehaviour
         elapsed = 0f;
         Vector3 lungeTarget = startPos + transform.forward * 0.5f;
         
-        while (elapsed < 0.1f) // Quick lunge
+        while (elapsed < 0.1f)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / 0.1f;
@@ -127,17 +121,26 @@ public class EnemyController : MonoBehaviour
             yield return null;
         }
         
-        // Check if player is still in range (they might have dodged during windup)
+        // Check if player is still in range
         float currentDistance = Vector3.Distance(transform.position, player.position);
         if (currentDistance <= attackRange && playerHealth != null)
         {
             playerHealth.TakeDamage((int)attackDamage);
-            
-            // Visual feedback on player
-            StartCoroutine(FlashRed(player.gameObject));
+
+            // ADDED: Knockback the player with upward pop
+            Rigidbody playerRb = player.GetComponent<Rigidbody>();
+            if (playerRb != null)
+            {
+                Vector3 knockbackDirection = (player.position - transform.position).normalized;
+                knockbackDirection.y = 0; // Keep horizontal
+                
+                // Apply force with both horizontal and upward components
+                Vector3 knockbackForce = knockbackDirection * 10f + Vector3.up * 10f;
+                playerRb.AddForce(knockbackForce, ForceMode.Impulse);
+            }
         }
         
-        // RECOVERY PHASE - Return to normal
+        // RECOVERY PHASE
         elapsed = 0f;
         while (elapsed < attackRecoveryDuration)
         {
@@ -147,39 +150,41 @@ public class EnemyController : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, startPos, t);
             transform.localScale = Vector3.Lerp(transform.localScale, originalScale, t);
             
-            if (renderer != null)
-            {
-                renderer.material.color = Color.Lerp(renderer.material.color, startColor, t);
-            }
-            
             yield return null;
         }
         
-        // Ensure we're back to original state
+        // Reset to original state
         transform.position = startPos;
         transform.localScale = originalScale;
-        if (renderer != null)
-        {
-            renderer.material.color = startColor;
-        }
         
         isAttacking = false;
     }
 
-    System.Collections.IEnumerator FlashRed(GameObject target)
+    // PUBLIC METHOD: Called when enemy takes damage (add this to Health.cs)
+    public void OnTakeDamage(int damage, Vector3 attackerPosition)
     {
-        Renderer renderer = target.GetComponent<Renderer>();
-        if (renderer == null) yield break;
+        // Interrupt current attack if in progress
+        if (isAttacking && currentAttackCoroutine != null)
+        {
+            StopCoroutine(currentAttackCoroutine);
+            isAttacking = false;
+            
+            // Reset visual state
+            transform.localScale = originalScale;
+        }
         
-        Color originalColor = renderer.material.color;
-        renderer.material.color = Color.red;
-        
-        yield return new WaitForSeconds(0.1f);
-        
-        renderer.material.color = originalColor;
+        // Apply knockback - POP UP AND BACK!
+        if (rb != null)
+        {
+            Vector3 knockbackDirection = (transform.position - attackerPosition).normalized;
+            knockbackDirection.y = 0; // Keep horizontal direction
+            
+            // Apply force with both horizontal and upward components
+            Vector3 knockbackForce = knockbackDirection * 20f + Vector3.up * 20f; // Horizontal + upward
+            rb.AddForce(knockbackForce, ForceMode.Impulse);
+        }
     }
 
-    // Visualize ranges in editor
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
