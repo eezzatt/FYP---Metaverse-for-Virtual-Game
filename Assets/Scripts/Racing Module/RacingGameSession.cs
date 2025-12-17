@@ -9,7 +9,7 @@ public class RacingGameSession : MonoBehaviour
 
     [Header("References")]
     public GameObject player;
-    public List<GameObject> checkpoints = new List<GameObject>();
+    public GameObject checkpoint; // Single checkpoint reference
 
     // Session tracking
     private SessionData sessionData;
@@ -20,8 +20,6 @@ public class RacingGameSession : MonoBehaviour
 
     // Racing metrics
     private int currentLap = 0;
-    private int currentCheckpoint = 0;
-    private int totalCheckpoints;
     private List<float> lapTimes = new List<float>();
     private float currentLapStartTime;
     private int collisionCount = 0;
@@ -31,30 +29,25 @@ public class RacingGameSession : MonoBehaviour
 
     // Countdown
     private float countdownTimer = 3f;
-    private bool isCountingDown = true;
+    public bool isCountingDown = true;
 
     void Start()
     {
-        totalCheckpoints = checkpoints.Count;
-
-        if (totalCheckpoints == 0)
+        if (checkpoint == null)
         {
-            Debug.LogError("No checkpoints assigned! Please add checkpoint GameObjects to the list.");
+            Debug.LogError("No checkpoint assigned! Please add checkpoint GameObject to the reference.");
             return;
         }
 
-        // FIXED: Just verify Checkpoint components exist, don't try to add CheckpointTrigger
-        for (int i = 0; i < checkpoints.Count; i++)
+        // Verify Checkpoint component exists
+        Checkpoint checkpointComponent = checkpoint.GetComponent<Checkpoint>();
+        if (checkpointComponent == null)
         {
-            Checkpoint checkpoint = checkpoints[i].GetComponent<Checkpoint>();
-            if (checkpoint == null)
-            {
-                Debug.LogError($"Checkpoint {i} ({checkpoints[i].name}) is missing Checkpoint component!");
-            }
-            else
-            {
-                Debug.Log($"Checkpoint {i} found: {checkpoints[i].name} (Number: {checkpoint.checkpointNumber})");
-            }
+            Debug.LogError($"Checkpoint ({checkpoint.name}) is missing Checkpoint component!");
+        }
+        else
+        {
+            Debug.Log($"Checkpoint found: {checkpoint.name}");
         }
 
         StartCountdown();
@@ -95,7 +88,7 @@ public class RacingGameSession : MonoBehaviour
             SampleSpeed();
         }
 
-        // ADDED: Allow player to quit race with ESC key
+        // Allow player to quit race with ESC key
         if (sessionActive && !sessionEnded && Input.GetKeyDown(KeyCode.Escape))
         {
             QuitRace();
@@ -114,7 +107,6 @@ public class RacingGameSession : MonoBehaviour
         sessionData.difficultyLevel = currentDifficulty;
 
         currentLap = 1;
-        currentCheckpoint = 0;
 
         Debug.Log("GO! Race STARTED!");
     }
@@ -126,7 +118,6 @@ public class RacingGameSession : MonoBehaviour
         Rigidbody rb = player.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // FIXED: Use linearVelocity for newer Unity or velocity for older Unity
             #if UNITY_2023_1_OR_NEWER
             float speed = rb.linearVelocity.magnitude;
             #else
@@ -142,26 +133,7 @@ public class RacingGameSession : MonoBehaviour
         }
     }
 
-    public void OnCheckpointPassed(int checkpointIndex)
-    {
-        if (!sessionActive || sessionEnded) return;
-
-        // Check if this is the expected next checkpoint
-        if (checkpointIndex == currentCheckpoint)
-        {
-            currentCheckpoint++;
-            Debug.Log($"Checkpoint {checkpointIndex} passed! ({currentCheckpoint}/{totalCheckpoints})");
-
-            // Note: Lap completion is now handled by the finish line checkpoint
-            // calling OnLapCompleted() directly
-        }
-        else
-        {
-            Debug.Log($"Skipped checkpoint! Expected {currentCheckpoint}, got {checkpointIndex}");
-        }
-    }
-
-    // ADDED: Public method that Checkpoint.cs can call when finish line is crossed
+    // Called by Checkpoint when player passes through
     public void OnLapCompleted()
     {
         if (!sessionActive || sessionEnded) return;
@@ -169,35 +141,19 @@ public class RacingGameSession : MonoBehaviour
         float lapTime = Time.time - currentLapStartTime;
         lapTimes.Add(lapTime);
         
-        Debug.Log($"Lap {currentLap} completed in {lapTime:F2} seconds!");
+        Debug.Log($"Lap {currentLap}/{totalLaps} completed in {lapTime:F2} seconds!");
 
         currentLap++;
-        currentCheckpoint = 0;
         currentLapStartTime = Time.time;
 
-        // Reset all checkpoint visuals for new lap
-        ResetAllCheckpoints();
-
-        // Check if race finished
+        // Check if race is finished
         if (currentLap > totalLaps)
         {
             EndRace(true);
         }
     }
 
-    void ResetAllCheckpoints()
-    {
-        foreach (GameObject checkpointObj in checkpoints)
-        {
-            Checkpoint checkpoint = checkpointObj.GetComponent<Checkpoint>();
-            if (checkpoint != null)
-            {
-                checkpoint.ResetCheckpoint();
-            }
-        }
-    }
-
-    // FIXED: Method to handle collision with full Collision data (called by RaceCarController)
+    // Method to handle collision with full Collision data (called by RaceCarController)
     public void OnCollision(Collision collision)
     {
         if (!sessionActive || sessionEnded) return;
@@ -217,7 +173,6 @@ public class RacingGameSession : MonoBehaviour
         }
 
         // Count ALL other collisions as obstacles
-        // This avoids the tag errors you were seeing
         collisionCount++;
         Debug.Log($"Collision with {collision.gameObject.name}! Total: {collisionCount}");
     }
@@ -234,14 +189,8 @@ public class RacingGameSession : MonoBehaviour
         }
     }
 
-    public void OnOffTrack(float deltaTime)
-    {
-        if (!sessionActive) return;
-        totalOffTrackTime += deltaTime;
-    }
-
     /// <summary>
-    /// ADDED: Call this when player quits race early (ESC key, quit button, etc.)
+    /// Call this when player quits race early (ESC key, quit button, etc.)
     /// </summary>
     public void QuitRace()
     {
@@ -276,7 +225,6 @@ public class RacingGameSession : MonoBehaviour
         sessionData.gameSpecificData["avgLapTime"] = avgLapTime;
         sessionData.gameSpecificData["totalRaceTime"] = totalDuration;
         sessionData.gameSpecificData["collisions"] = collisionCount;
-        sessionData.gameSpecificData["checkpointsPassed"] = (currentLap - 1) * totalCheckpoints + currentCheckpoint;
         sessionData.gameSpecificData["maxSpeed"] = maxSpeedReached;
         sessionData.gameSpecificData["avgSpeed"] = avgSpeed;
         sessionData.gameSpecificData["consistency"] = consistency;
@@ -329,12 +277,7 @@ public class RacingGameSession : MonoBehaviour
         return Mathf.Clamp01(1f - (stdDev / avg));
     }
 
-    public void OnPlayerDeath()
-    {
-        EndRace(false);
-    }
-
-    // ADDED: Auto-save on scene change or application quit
+    // Auto-save on scene change or application quit
     void OnDestroy()
     {
         // If session was active but never ended, save the data

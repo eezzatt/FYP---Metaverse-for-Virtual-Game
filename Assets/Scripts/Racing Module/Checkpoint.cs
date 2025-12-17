@@ -2,20 +2,15 @@ using UnityEngine;
 
 /// <summary>
 /// Checkpoint trigger for racing game
-/// Place these along the track to track progress
+/// Every pass through this checkpoint counts as completing a lap
 /// </summary>
 public class Checkpoint : MonoBehaviour
 {
-    [Header("Checkpoint Settings")]
-    public int checkpointNumber = 0; // Order in the track (0 = start/finish)
-    public bool isFinishLine = false;
-    
     [Header("Visual Feedback")]
     public Color normalColor = Color.yellow;
     public Color passedColor = Color.green;
     
     private Renderer checkpointRenderer;
-    private bool hasPassed = false;
 
     void Start()
     {
@@ -44,42 +39,32 @@ public class Checkpoint : MonoBehaviour
 
     void OnCheckpointPassed(GameObject player)
     {
-        // FIXED: Use FindObjectOfType instead of FindFirstObjectByType
         RacingGameSession session = FindFirstObjectByType<RacingGameSession>();
         
         if (session != null)
         {
-            if (isFinishLine)
-            {
-                // Player crossed finish line
-                session.OnLapCompleted();
-                ResetCheckpoint();
-            }
-            else
-            {
-                // Regular checkpoint
-                if (!hasPassed)
-                {
-                    session.OnCheckpointPassed(checkpointNumber);
-                    MarkAsPassed();
-                }
-            }
+            // Every checkpoint pass counts as a lap completion
+            session.OnLapCompleted();
+            
+            // Visual feedback
+            MarkAsPassed();
+            
+            // Reset visual after a short delay
+            Invoke("ResetCheckpoint", 0.5f);
         }
     }
 
     void MarkAsPassed()
     {
-        hasPassed = true;
         if (checkpointRenderer != null)
         {
             checkpointRenderer.material.color = passedColor;
         }
     }
 
-    // ADDED: Public method to reset from RacingGameSession
+    // Public method to reset checkpoint visual
     public void ResetCheckpoint()
     {
-        hasPassed = false;
         if (checkpointRenderer != null)
         {
             checkpointRenderer.material.color = normalColor;
@@ -89,7 +74,7 @@ public class Checkpoint : MonoBehaviour
     // Visualize checkpoint in editor
     void OnDrawGizmos()
     {
-        Gizmos.color = isFinishLine ? Color.green : Color.yellow;
+        Gizmos.color = Color.green;
         Gizmos.DrawWireCube(transform.position, transform.localScale);
     }
 }
