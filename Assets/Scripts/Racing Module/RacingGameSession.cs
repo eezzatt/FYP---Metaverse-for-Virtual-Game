@@ -4,11 +4,12 @@ using System.Collections.Generic;
 public class RacingGameSession : MonoBehaviour
 {
     [Header("Session Settings")]
-    public DifficultyLevel currentDifficulty = DifficultyLevel.Medium;
-    public int totalLaps = 3;
+    public int playerID;
+    public DifficultyLevel currentDifficulty;
+    public int totalLaps;
 
     [Header("References")]
-    public GameObject player;
+    public GameObject racecar;
     public GameObject checkpoint; // Single checkpoint reference
 
     // Session tracking
@@ -29,7 +30,7 @@ public class RacingGameSession : MonoBehaviour
 
     // Countdown
     private float countdownTimer = 3f;
-    public bool isCountingDown = true;
+    internal bool isCountingDown;
 
     void Start()
     {
@@ -104,6 +105,7 @@ public class RacingGameSession : MonoBehaviour
         sessionStartTime = Time.time;
         currentLapStartTime = Time.time;
         sessionData = new SessionData("Racing");
+        sessionData.playerID = playerID;
         sessionData.difficultyLevel = currentDifficulty;
 
         currentLap = 1;
@@ -113,22 +115,19 @@ public class RacingGameSession : MonoBehaviour
 
     void SampleSpeed()
     {
-        if (player == null) return;
+        if (racecar == null) return;
 
-        Rigidbody rb = player.GetComponent<Rigidbody>();
-        if (rb != null)
+        RaceCarController controller = racecar.GetComponent<RaceCarController>();
+        if (controller != null)
         {
-            #if UNITY_2023_1_OR_NEWER
-            float speed = rb.linearVelocity.magnitude;
-            #else
-            float speed = rb.velocity.magnitude;
-            #endif
+            float speed = controller.currentSpeed;
             
             speedSamples.Add(speed);
 
             if (speed > maxSpeedReached)
             {
                 maxSpeedReached = speed;
+                // Debug.Log("New max speed reached: " + maxSpeedReached);
             }
         }
     }
@@ -157,9 +156,6 @@ public class RacingGameSession : MonoBehaviour
     public void OnCollision(Collision collision)
     {
         if (!sessionActive || sessionEnded) return;
-        
-        // Only count collision if race has actually started (not during countdown)
-        if (!raceStarted || isCountingDown) return;
 
         // Ignore collisions with ground/track (check by layer or name patterns)
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") ||
@@ -177,18 +173,6 @@ public class RacingGameSession : MonoBehaviour
         Debug.Log($"Collision with {collision.gameObject.name}! Total: {collisionCount}");
     }
 
-    // Keep this for backwards compatibility
-    public void OnCollisionDetected()
-    {
-        if (!sessionActive || sessionEnded) return;
-        
-        if (raceStarted && !isCountingDown)
-        {
-            collisionCount++;
-            Debug.Log($"Collision detected! Total: {collisionCount}");
-        }
-    }
-
     /// <summary>
     /// Call this when player quits race early (ESC key, quit button, etc.)
     /// </summary>
@@ -204,6 +188,11 @@ public class RacingGameSession : MonoBehaviour
     {
         if (!sessionActive || sessionEnded) return;
 
+        // foreach(float speed in speedSamples)
+        // {
+        //     Debug.Log(speed);
+        // }
+        
         sessionEnded = true;
         sessionActive = false;
 
@@ -255,6 +244,8 @@ public class RacingGameSession : MonoBehaviour
         {
             sum += value;
         }
+        // Debug.Log(sum);
+        // Debug.Log(values.Count);
         return sum / values.Count;
     }
 
