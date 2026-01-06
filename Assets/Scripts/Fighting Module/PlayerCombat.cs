@@ -4,21 +4,30 @@ public class PlayerCombat : MonoBehaviour
 {
     [Header("Attack Settings")]
     public Transform attackPoint;
-    public float attackRange = 1.5f;
+    public float attackRange;
     public LayerMask enemyLayers;
-    public int attackDamage = 10;
-    public float attackCooldown = 0.5f;
     
     [Header("Dodge Settings")]
-    public float dodgeDuration = 0.3f;
-    public float dodgeCooldown = 1f;
-    public float dodgeDistance = 3f;
+    public float dodgeDuration;
+    public float dodgeDistance;
     
+    [Header("Audio Feedback")]
+    public AudioClip attackSound;        // Whoosh/swing sound
+    public AudioClip hitSound;           // Impact sound when you hit enemy
+    [Range(0f, 1f)]
+    public float attackVolume = 0.7f;    // Volume control
+    
+    private AudioSource audioSource;
+    private int attackDamage;
+    private float attackCooldown;
+    private float dodgeCooldown;
+
     private float nextAttackTime = 0f;
     private float nextDodgeTime = 0f;
     private bool isDodging = false;
     private FightingGameSession gameSession;
     private Rigidbody rb;
+    private DifficultyLevel difficulty;
     
     // Combo tracking
     private int currentCombo = 0;
@@ -31,6 +40,17 @@ public class PlayerCombat : MonoBehaviour
         gameSession = FindFirstObjectByType<FightingGameSession>();
         rb = GetComponent<Rigidbody>();
         
+        // Setup audio source
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        // Configure audio source for combat sounds
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f; // 2D sound
+        audioSource.volume = attackVolume;
+        
         if (gameSession == null)
         {
             Debug.LogWarning("PlayerCombat: No FightingGameSession found in scene");
@@ -40,6 +60,7 @@ public class PlayerCombat : MonoBehaviour
         {
             Debug.LogWarning("PlayerCombat: No Rigidbody found - dodge mechanic won't work properly");
         }
+        InitializePlayerStats(gameSession.currentDifficulty);
     }
 
     void Update()
@@ -78,6 +99,9 @@ public class PlayerCombat : MonoBehaviour
 
     void Attack()
     {
+        // Play attack swing sound
+        PlaySound(attackSound);
+        
         // Detect enemies in range
         Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
         
@@ -104,9 +128,16 @@ public class PlayerCombat : MonoBehaviour
                     {
                         gameSession.OnComboExecuted();
                     }
+
                     Debug.Log($"COMBO x{currentCombo}!");
                 }
             }
+        }
+        
+        // Play hit or miss sound
+        if (hitSomething)
+        {
+            PlaySound(hitSound);
         }
 
         // Report to game session
@@ -165,6 +196,39 @@ public class PlayerCombat : MonoBehaviour
     public void OnPlayerTakeDamage()
     {
         ResetCombo();
+    }
+
+    void InitializePlayerStats(DifficultyLevel difficulty)
+    {
+        if (difficulty == DifficultyLevel.Easy)
+        {
+            attackDamage = 15;
+            attackCooldown = 0.3f;
+            dodgeCooldown = 0.5f;
+        }
+        else if (difficulty == DifficultyLevel.Medium)
+        {
+            attackDamage = 10;
+            attackCooldown = 0.5f;
+            dodgeCooldown = 1f;
+        }
+        else
+        {
+            attackDamage = 8;
+            attackCooldown = 0.7f;
+            dodgeCooldown = 1.5f;
+        }
+    }
+
+    // ===== AUDIO FEEDBACK METHOD =====
+    
+    void PlaySound(AudioClip clip, float pitchVariation = 1.0f)
+    {
+        if (clip == null || audioSource == null) return;
+        
+        // Add slight pitch variation for more dynamic sound
+        audioSource.pitch = pitchVariation + Random.Range(-0.1f, 0.1f);
+        audioSource.PlayOneShot(clip, attackVolume);
     }
 
     void OnDrawGizmosSelected()
