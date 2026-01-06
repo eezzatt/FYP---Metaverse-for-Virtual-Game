@@ -2,34 +2,40 @@ using UnityEngine;
 
 public class RaceCarController : MonoBehaviour
 {
-    public float accelerationSpeed = 20f;
-    public float maxSpeed = 20f;  // Reduced from 30f
-    public float turnSpeed = 100f;
-    public float brakeForce = 10f;
+    private float accelerationSpeed;
+    private float maxSpeed;
+    private float turnSpeed = 100f;
+    private float brakeForce = 10f;
     
     private Rigidbody rb;
-    private RacingGameSession session;
-    private float currentSpeed = 0f;
+    private RacingGameSession gameSession; // FIXED: Only one session variable
+    internal float currentSpeed = 0f;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         
-        // FIXED: Use correct API for Unity version
-        #if UNITY_2023_1_OR_NEWER
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        #else
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        #endif
 
-        session = FindFirstObjectByType<RacingGameSession>();
+        gameSession = FindFirstObjectByType<RacingGameSession>();
+        
+        if (gameSession != null)
+        {
+            DiffcultySetter(gameSession.currentDifficulty);
+        }
+        else
+        {
+            Debug.LogWarning("RaceCarController: No RacingGameSession found - using default settings");
+            accelerationSpeed = 20f;
+            maxSpeed = 35f;
+        }
     }
 
     private void FixedUpdate()
     {
-        if (!session.isCountingDown)
+        // FIXED: Check gameSession instead of session
+        if (gameSession != null && !gameSession.isCountingDown)
         {
             // Get input
             float moveInput = Input.GetAxis("Vertical");
@@ -51,7 +57,6 @@ public class RaceCarController : MonoBehaviour
                 currentSpeed = Mathf.Max(currentSpeed - 5f * Time.fixedDeltaTime, 0);
             }
 
-            
             // Move forward
             Vector3 forwardMovement = transform.forward * currentSpeed * Time.fixedDeltaTime;
             rb.MovePosition(rb.position + forwardMovement);
@@ -64,28 +69,39 @@ public class RaceCarController : MonoBehaviour
                 rb.MoveRotation(rb.rotation * turnRotation);
             }
         }
-        
 
-        // FIXED: Prevent tunneling by clamping velocity (Unity version compatible)
-        #if UNITY_2023_1_OR_NEWER
+        // FIXED: Prevent tunneling by clamping velocity
         if (rb.linearVelocity.magnitude > maxSpeed)
         {
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
         }
-        #else
-        if (rb.velocity.magnitude > maxSpeed)
-        {
-            rb.velocity = rb.velocity.normalized * maxSpeed;
-        }
-        #endif
     }
     
     void OnCollisionEnter(Collision collision)
     {
-        // FIXED: Use FindObjectOfType instead of FindFirstObjectByType
-        if (session != null)
+        // FIXED: Use gameSession instead of session
+        if (gameSession != null)
         {
-            session.OnCollision(collision);
+            gameSession.OnCollision(collision);
+        }
+    }
+    
+    private void DiffcultySetter(DifficultyLevel difficulty)
+    {
+        if (difficulty == DifficultyLevel.Easy)
+        {
+            accelerationSpeed = 15f;
+            maxSpeed = 30f;
+        }
+        else if (difficulty == DifficultyLevel.Medium)
+        {
+            accelerationSpeed = 20f;
+            maxSpeed = 35f;
+        }
+        else
+        {
+            accelerationSpeed = 25f;
+            maxSpeed = 40f;
         }
     }
 }

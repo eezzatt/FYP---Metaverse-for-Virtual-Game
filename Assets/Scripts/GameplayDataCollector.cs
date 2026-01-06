@@ -70,7 +70,7 @@ public class GameplayDataCollector : MonoBehaviour
         List<string> values = new List<string>
         {
             data.sessionID,
-            data.playerID,
+            data.playerID.ToString(),
             data.gameType,
             data.difficultyLevel.ToString(),
             data.sessionDuration.ToString("F2"),
@@ -161,7 +161,7 @@ public class GameplayDataCollector : MonoBehaviour
 public class SessionData
 {
     public string sessionID;
-    public string playerID;
+    public int playerID;
     public string gameType;
     public DifficultyLevel difficultyLevel;
     public float sessionDuration;
@@ -173,7 +173,6 @@ public class SessionData
     public SessionData(string gameType)
     {
         this.sessionID = System.Guid.NewGuid().ToString();
-        this.playerID = "Player1"; // Can be changed to PlayerPrefs.GetString("PlayerID")
         this.gameType = gameType;
         this.gameSpecificData = new Dictionary<string, object>();
     }

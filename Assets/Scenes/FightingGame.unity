@@ -837,6 +837,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64223027a0aebdb48918f08824bb2efe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridSize: 20
+  tileSize: 1
+  gridColor1: {r: 0.2, g: 0.2, b: 0.24, a: 1}
+  gridColor2: {r: 0.27, g: 0.27, b: 0.31, a: 1}
 --- !u!4 &559929790
 Transform:
   m_ObjectHideFlags: 0
@@ -1115,17 +1119,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1334799102}
-  moveSpeed: 2
   rotationSpeed: 5
   attackRange: 2
   stoppingDistance: 1.8
-  attackDamage: 15
-  attackCooldown: 2
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
-  attackWindupDuration: 5
-  attackRecoveryDuration: 0.5
 --- !u!54 &749930557
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1165,7 +1164,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67323156c9923c8438fc7d05c72916dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
   healthBar: {fileID: 0}
   healthBarFill: {fileID: 0}
   fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
@@ -1185,7 +1183,6 @@ MonoBehaviour:
   skinColor: {r: 1, g: 0.8, b: 0.6, a: 1}
   shirtColor: {r: 0.27672952, g: 0, b: 0, a: 1}
   pantsColor: {r: 0, g: 0, b: 0, a: 1}
-  buildOnStart: 1
 --- !u!1 &793861178
 GameObject:
   m_ObjectHideFlags: 0
@@ -2082,10 +2079,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 986aede28318a1c448f248176ea60762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentDifficulty: 1
+  playerID: 0
+  currentDifficulty: 0
   player: {fileID: 1334799095}
   enemy: {fileID: 749930551}
-  perfectDodgeWindow: 5
 --- !u!4 &1294638125
 Transform:
   m_ObjectHideFlags: 0
@@ -2165,7 +2162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  turnSpeed: 200
+  turnSpeed: 150
   jumpForce: 30
 --- !u!136 &1334799099
 CapsuleCollider:
@@ -2276,11 +2273,11 @@ MonoBehaviour:
   enemyLayers:
     serializedVersion: 2
     m_Bits: 8
-  attackDamage: 20
-  attackCooldown: 0.3
   dodgeDuration: 0.3
-  dodgeCooldown: 1
   dodgeDistance: 3
+  attackSound: {fileID: 8300000, guid: 1cf3cabec83b68b4e8ede9da6e48f48c, type: 3}
+  hitSound: {fileID: 8300000, guid: a524f3f7fc0c69b49adca769846e2074, type: 3}
+  attackVolume: 0.7
 --- !u!114 &1334799104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2293,7 +2290,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67323156c9923c8438fc7d05c72916dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
   healthBar: {fileID: 0}
   healthBarFill: {fileID: 0}
   fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
@@ -2313,7 +2309,6 @@ MonoBehaviour:
   skinColor: {r: 1, g: 0.8, b: 0.6, a: 1}
   shirtColor: {r: 0, g: 0, b: 1, a: 1}
   pantsColor: {r: 0.2, g: 0.4, b: 0.2, a: 1}
-  buildOnStart: 1
 --- !u!1 &1446250849
 GameObject:
   m_ObjectHideFlags: 0

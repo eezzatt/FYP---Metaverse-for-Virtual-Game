@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float turnSpeed = 150f;
-    public float jumpForce = 5f;
+    [Header("Movement Settings")]
+    public float moveSpeed;
+    public float turnSpeed;
+    public float jumpForce;
     private int score = 0;
     private Vector3 lastPosition;
     private Rigidbody rb;

@@ -3,12 +3,11 @@ using UnityEngine;
 public class SimpleCharacterBuilder : MonoBehaviour
 {
     [Header("Character Colors")]
-    public Color skinColor = new Color(1f, 0.8f, 0.6f); // Peach skin
-    public Color shirtColor = Color.blue;
-    public Color pantsColor = new Color(0.2f, 0.4f, 0.2f); // Dark green
-    
-    [Header("Build on Start")]
-    public bool buildOnStart = true;
+    public Color skinColor; // Peach skin
+    public Color shirtColor;
+    public Color pantsColor; // Dark green
+
+    private bool buildOnStart = true;
     
     private GameObject originalCapsule;
 

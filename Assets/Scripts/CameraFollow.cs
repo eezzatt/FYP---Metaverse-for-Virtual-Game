@@ -2,10 +2,11 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
+    [Header("Camera Settings")]
     public Transform target;
-    public Vector3 offset = new Vector3(0, 1, -5);
-    public float rotationSpeed = 15f;   // drag sensitivity
-    public float returnSpeed = 2f;     // how fast it snaps back
+    public Vector3 offset;
+    public float rotationSpeed;   // drag sensitivity
+    public float returnSpeed;     // how fast it snaps back
 
     private float yaw = 0f;
     private float pitch = 0f;
