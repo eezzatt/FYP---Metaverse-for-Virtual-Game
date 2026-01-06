@@ -4,9 +4,9 @@ using UnityEngine.Events;
 
 public class Health : MonoBehaviour
 {
-    public int maxHealth = 100;
+    private int maxHealth;
     private int currentHealth;
-    private bool isDead = false;
+    internal bool isDead = false;
 
     public Slider healthBar;
     public Image healthBarFill;
@@ -21,11 +21,12 @@ public class Health : MonoBehaviour
 
     void Start()
     {
+        gameSession = FindFirstObjectByType<FightingGameSession>();
+        InitializeHealth(gameSession.currentDifficulty);
+
         currentHealth = maxHealth;
         UpdateHealthBar();
-        
-        gameSession = FindFirstObjectByType<FightingGameSession>();
-        
+
         // Invoke initial health percentage
         OnHealthChanged.Invoke(GetHealthPercentage());
     }
@@ -82,15 +83,34 @@ public class Health : MonoBehaviour
 
     void DisableEntity()
     {
-        // Disable movement and combat
-        var playerController = GetComponent<PlayerController>();
-        if (playerController) playerController.enabled = false;
+        if (gameObject.CompareTag("Player")) 
+        {
+            // Disable movement and combat
+            var playerController = GetComponent<PlayerController>();
+            if (playerController) playerController.enabled = false;
 
-        var enemyController = GetComponent<EnemyController>();
-        if (enemyController) enemyController.enabled = false;
+            var playerCombat = GetComponent<PlayerCombat>();
+            if (playerCombat) playerCombat.enabled = false;
 
-        var playerCombat = GetComponent<PlayerCombat>();
-        if (playerCombat) playerCombat.enabled = false;
+            GameObject enemy = GameObject.FindGameObjectWithTag("Enemy");
+            var enemyController = enemy.GetComponent<EnemyController>();
+            if (enemyController) enemyController.enabled = false;
+        }
+        else
+        {
+            // Disable movement and combat
+            var enemyController = GetComponent<EnemyController>();
+            if (enemyController) enemyController.enabled = false;
+
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+            // Disable movement and combat
+            var playerController = player.GetComponent<PlayerController>();
+            if (playerController) playerController.enabled = false;
+
+            var playerCombat = player.GetComponent<PlayerCombat>();
+            if (playerCombat) playerCombat.enabled = false;
+        }
 
         // Visual feedback - make gray and fall
         Renderer renderer = GetComponent<Renderer>();
@@ -114,6 +134,29 @@ public class Health : MonoBehaviour
             {
                 healthBarFill.color = Color.Lerp(lowHealthColor, fullHealthColor, healthPercent);
             }
+        }
+    }
+
+    void InitializeHealth(DifficultyLevel difficulty)
+    {
+        if (gameObject.name.ToLower().Contains("player"))
+        {
+            if(difficulty == DifficultyLevel.Easy)
+            {
+                maxHealth = 120;
+            }
+            else if (difficulty == DifficultyLevel.Medium)
+            {
+                maxHealth = 100;
+            }
+            else
+            {
+                maxHealth = 80;
+            }
+        }
+        else
+        {
+            maxHealth = 100;
         }
     }
 

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 public class FightingGameSession : MonoBehaviour
 {
     [Header("Session Settings")]
-    public DifficultyLevel currentDifficulty = DifficultyLevel.Medium;
+    public int playerID;
+    public DifficultyLevel currentDifficulty;
     
     [Header("References")]
     public GameObject player;
     public GameObject enemy;
 
-    [Header("Perfect Dodge Settings")]
-    public float perfectDodgeWindow = 2f; // Time window after enemy attack starts
+    private float perfectDodgeWindow; // Time window after enemy attack starts
 
     // Session tracking
     private SessionData sessionData;
@@ -37,6 +37,7 @@ public class FightingGameSession : MonoBehaviour
     {
         // Don't start session automatically
         // Will be started when enemy is spawned/activated
+        initializeDodgeWindow(currentDifficulty);
     }
 
     void Update()
@@ -75,6 +76,7 @@ public class FightingGameSession : MonoBehaviour
         sessionActive = true;
         sessionStartTime = Time.time;
         sessionData = new SessionData("Fighting");
+        sessionData.playerID = playerID;
         sessionData.difficultyLevel = currentDifficulty;
 
         Debug.Log($"Fighting Game Session STARTED - Difficulty: {currentDifficulty}");
@@ -118,7 +120,7 @@ public class FightingGameSession : MonoBehaviour
         // Populate session data
         sessionData.sessionDuration = duration;
         sessionData.score = CalculateScore(victory, accuracy, duration);
-        sessionData.deaths = victory ? 0 : 1;
+        sessionData.deaths = playerDeaths;
         sessionData.completed = completed;
 
         // Add fighting-specific data
@@ -229,9 +231,24 @@ public class FightingGameSession : MonoBehaviour
                 OnPerfectDodge();
                 RecordReactionTime(reactionTime);
                 dodgeCounted = true;
-                Debug.Log($"PERFECT DODGE! Reaction time: {reactionTime:F3}s");
             }
         }
+    }
+
+    void initializeDodgeWindow(DifficultyLevel difficulty)
+    {
+        if (difficulty == DifficultyLevel.Easy)
+            {
+                perfectDodgeWindow = 3.0f;
+            }
+        else if (difficulty == DifficultyLevel.Medium)
+            {
+                perfectDodgeWindow = 2.0f;
+            }
+            else
+            {
+                perfectDodgeWindow = 1.0f;
+            }
     }
 }
 

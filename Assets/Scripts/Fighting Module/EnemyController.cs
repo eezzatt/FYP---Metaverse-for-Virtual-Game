@@ -6,29 +6,29 @@ public class EnemyController : MonoBehaviour
     public Transform player;
     
     [Header("Movement")]
-    public float moveSpeed = 2f;
     public float rotationSpeed = 5f;
     public float attackRange = 2f;
     public float stoppingDistance = 1.8f;
     
     [Header("Combat")]
-    public float attackDamage = 15f;
-    public float attackCooldown = 2f;
     public LayerMask playerLayer;
     
-    [Header("Animation")]
-    public float attackWindupDuration = 0.3f;
-    public float attackRecoveryDuration = 0.2f;
-    
+    private float moveSpeed;
+    private float attackWindupDuration;
+    private float attackRecoveryDuration;
+    private float attackDamage;
+    private float attackCooldown;
     private float nextAttackTime = 0f;
     private bool isAttacking = false;
     private Health playerHealth;
     private Vector3 originalScale;
     private Coroutine currentAttackCoroutine; // Track the attack coroutine
     private Rigidbody rb;
+    private FightingGameSession gameSession;
 
     void Start()
     {
+        gameSession = FindFirstObjectByType<FightingGameSession>();
         if (player != null)
         {
             playerHealth = player.GetComponent<Health>();
@@ -42,6 +42,7 @@ public class EnemyController : MonoBehaviour
         }
         
         originalScale = transform.localScale;
+        InitializeEnemy(gameSession.currentDifficulty);
     }
 
     void Update()
@@ -182,6 +183,34 @@ public class EnemyController : MonoBehaviour
             // Apply force with both horizontal and upward components
             Vector3 knockbackForce = knockbackDirection * 20f + Vector3.up * 20f; // Horizontal + upward
             rb.AddForce(knockbackForce, ForceMode.Impulse);
+        }
+    }
+
+    void InitializeEnemy(DifficultyLevel difficulty)
+    {
+        if (difficulty == DifficultyLevel.Easy)
+        {
+            moveSpeed = 2f;
+            attackDamage = 8;
+            attackCooldown = 2f;
+            attackWindupDuration = 3f;
+            attackRecoveryDuration = 2f;
+        }
+        else if (difficulty == DifficultyLevel.Medium)
+        {
+            moveSpeed = 2f;
+            attackDamage = 10;
+            attackCooldown = 1.5f;
+            attackWindupDuration = 2f;
+            attackRecoveryDuration = 1.5f;
+        }
+        else
+        {
+            moveSpeed = 3f;
+            attackDamage = 15;
+            attackCooldown = 1.0f;
+            attackWindupDuration = 1f;
+            attackRecoveryDuration = 1f;
         }
     }
 
