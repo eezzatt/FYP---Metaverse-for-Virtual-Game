@@ -24,7 +24,6 @@ public class RacingGameSession : MonoBehaviour
     private List<float> lapTimes = new List<float>();
     private float currentLapStartTime;
     private int collisionCount = 0;
-    private float totalOffTrackTime = 0f;
     private List<float> speedSamples = new List<float>();
     private float maxSpeedReached = 0f;
 
@@ -217,7 +216,6 @@ public class RacingGameSession : MonoBehaviour
         sessionData.gameSpecificData["maxSpeed"] = maxSpeedReached;
         sessionData.gameSpecificData["avgSpeed"] = avgSpeed;
         sessionData.gameSpecificData["consistency"] = consistency;
-        sessionData.gameSpecificData["offTrackTime"] = totalOffTrackTime;
 
         // Save to CSV
         GameplayDataCollector.Instance.SaveSessionData(sessionData);
