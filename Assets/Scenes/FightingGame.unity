@@ -2079,7 +2079,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 986aede28318a1c448f248176ea60762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerID: 0
+  playerID: 3
   currentDifficulty: 0
   player: {fileID: 1334799095}
   enemy: {fileID: 749930551}

@@ -45814,7 +45814,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b03ad8f45cee6ef4ba3e5ea6391b6090, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerID: 0
+  playerID: 3
   currentDifficulty: 2
   totalLaps: 2
   racecar: {fileID: 1261572453}
@@ -82588,8 +82588,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obstaclePrefab: {fileID: 7221273671244530007, guid: d62ecb8456c78284a9fa9a50474224c3, type: 3}
-  obstaclesPerCurve: 3
-  edgeBuffer: 2
+  obstaclesPerCurve: 5
+  edgeBuffer: 2.5
   trackWidth: 15
   obstacleHeight: 0.5
   archCircumferences:
