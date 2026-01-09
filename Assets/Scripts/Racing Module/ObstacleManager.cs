@@ -14,7 +14,7 @@ public class ObstacleManager : MonoBehaviour
     public GameObject obstaclePrefab; // Assign the obstacle prefab in inspector
     
      [Tooltip("Number of obstacles per curved section (Hard difficulty only)")]
-    public int obstaclesPerCurve = 2;
+    public int obstaclesPerCurve = 3;
     
     [Header("Spawn Settings")]
     [Tooltip("Minimum distance from track edges")]
@@ -157,7 +157,6 @@ public class ObstacleManager : MonoBehaviour
             Vector3 sectionPos = section.transform.position;
             Bounds bounds = GetSectionBounds(section);
             float archCircumference = archCircumferences[j];
-            Debug.Log(bounds.extents.x + " " + bounds.extents.y + " " + bounds.extents.z);
             
             // Spawn fewer obstacles on curves to avoid blocking the path
             for (int i = 0; i < obstaclesPerCurve; i++)
@@ -351,13 +350,13 @@ public class ObstacleManager : MonoBehaviour
 
     public void SetNumberOfObstacles(float sectionLength)
     {
-        if (sectionLength >= 50)
+        if (sectionLength >= 70)
         {
-            obstaclesPerStraight = 4;
+            obstaclesPerStraight = 6;
         }
         else
         {
-            obstaclesPerStraight = 3;
+            obstaclesPerStraight = 4;
         }
     }
 
