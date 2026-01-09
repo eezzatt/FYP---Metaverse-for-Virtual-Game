@@ -48,7 +48,7 @@ public class GameplayDataCollector : MonoBehaviour
         if (!File.Exists(csvFilePath))
         {
             // Write header row
-            string headers = "SessionID,PlayerID,GameType,DifficultyLevel,SessionDuration,Score,Deaths,Completed,Timestamp";
+            string headers = "sessionID,playerID,gameType,difficultyLevel,sessionDuration,score,deaths,completed,timestamp";
             File.WriteAllText(csvFilePath, headers + "\n");
             Debug.Log($"Created new CSV file at: {csvFilePath}");
         }
