@@ -103,7 +103,7 @@ public class EnemyController : MonoBehaviour
             transform.position = Vector3.Lerp(startPos, pullBackPos, t);
             
             // Scale up slightly
-            transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.2f, t);
+            transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.5f, t);
             
             yield return null;
         }
@@ -192,25 +192,25 @@ public class EnemyController : MonoBehaviour
         {
             moveSpeed = 2f;
             attackDamage = 8;
-            attackCooldown = 2f;
-            attackWindupDuration = 3f;
-            attackRecoveryDuration = 2f;
+            attackCooldown = 1.5f;
+            attackWindupDuration = 1.5f;
+            attackRecoveryDuration = 1.5f;
         }
         else if (difficulty == DifficultyLevel.Medium)
         {
-            moveSpeed = 2f;
+            moveSpeed = 2.5f;
             attackDamage = 10;
-            attackCooldown = 1.5f;
-            attackWindupDuration = 2f;
-            attackRecoveryDuration = 1.5f;
+            attackCooldown = 0.7f;
+            attackWindupDuration = 0.7f;
+            attackRecoveryDuration = 0.7f;
         }
         else
         {
             moveSpeed = 3f;
             attackDamage = 15;
-            attackCooldown = 1.0f;
-            attackWindupDuration = 1f;
-            attackRecoveryDuration = 1f;
+            attackCooldown = 0.7f;
+            attackWindupDuration = 0.7f;
+            attackRecoveryDuration = 0.7f;
         }
     }
 

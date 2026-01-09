@@ -202,20 +202,20 @@ public class PlayerCombat : MonoBehaviour
     {
         if (difficulty == DifficultyLevel.Easy)
         {
-            attackDamage = 15;
-            attackCooldown = 0.3f;
+            attackDamage = 10;
+            attackCooldown = 0.8f;
             dodgeCooldown = 0.5f;
         }
         else if (difficulty == DifficultyLevel.Medium)
         {
-            attackDamage = 10;
-            attackCooldown = 0.5f;
+            attackDamage = 8;
+            attackCooldown = 1f;
             dodgeCooldown = 1f;
         }
         else
         {
-            attackDamage = 8;
-            attackCooldown = 0.7f;
+            attackDamage = 5;
+            attackCooldown = 1.2f;
             dodgeCooldown = 1.5f;
         }
     }
