@@ -96,12 +96,12 @@ public class RaceCarController : MonoBehaviour
         else if (difficulty == DifficultyLevel.Medium)
         {
             accelerationSpeed = 20f;
-            maxSpeed = 35f;
+            maxSpeed = 40f;
         }
         else
         {
             accelerationSpeed = 25f;
-            maxSpeed = 40f;
+            maxSpeed = 45f;
         }
     }
 }
