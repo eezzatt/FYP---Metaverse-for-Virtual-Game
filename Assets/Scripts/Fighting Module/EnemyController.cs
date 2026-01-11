@@ -190,7 +190,7 @@ public class EnemyController : MonoBehaviour
     {
         if (difficulty == DifficultyLevel.Easy)
         {
-            moveSpeed = 2f;
+            moveSpeed = 4f;
             attackDamage = 8;
             attackCooldown = 1.5f;
             attackWindupDuration = 1.5f;
@@ -198,7 +198,7 @@ public class EnemyController : MonoBehaviour
         }
         else if (difficulty == DifficultyLevel.Medium)
         {
-            moveSpeed = 2.5f;
+            moveSpeed = 5f;
             attackDamage = 10;
             attackCooldown = 0.7f;
             attackWindupDuration = 0.7f;
@@ -206,11 +206,11 @@ public class EnemyController : MonoBehaviour
         }
         else
         {
-            moveSpeed = 3f;
+            moveSpeed = 6f;
             attackDamage = 15;
-            attackCooldown = 0.7f;
-            attackWindupDuration = 0.7f;
-            attackRecoveryDuration = 0.7f;
+            attackCooldown = 0.5f;
+            attackWindupDuration = 0.5f;
+            attackRecoveryDuration = 0.5f;
         }
     }
 
