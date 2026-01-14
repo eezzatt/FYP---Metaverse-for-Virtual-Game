@@ -206,8 +206,8 @@ public class EnemyController : MonoBehaviour
         }
         else
         {
-            moveSpeed = 6f;
-            attackDamage = 15;
+            moveSpeed = 5.5f;
+            attackDamage = 10;
             attackCooldown = 0.5f;
             attackWindupDuration = 0.5f;
             attackRecoveryDuration = 0.5f;
