@@ -27,7 +27,7 @@ public class PlayerCombat : MonoBehaviour
     private bool isDodging = false;
     private FightingGameSession gameSession;
     private Rigidbody rb;
-    private DifficultyLevel difficulty;
+    private DifficultyLevel difficultyLevel;
     
     // Combo tracking
     private int currentCombo = 0;
@@ -60,7 +60,10 @@ public class PlayerCombat : MonoBehaviour
         {
             Debug.LogWarning("PlayerCombat: No Rigidbody found - dodge mechanic won't work properly");
         }
-        InitializePlayerStats(gameSession.currentDifficulty);
+
+        difficultyLevel = MainMenuManager.GetDifficulty();
+        InitializePlayerStats(difficultyLevel);
+        Debug.Log("Player Difficulty: " + difficultyLevel);
     }
 
     void Update()

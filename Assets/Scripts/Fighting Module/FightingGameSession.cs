@@ -4,12 +4,22 @@ using System.Collections.Generic;
 public class FightingGameSession : MonoBehaviour
 {
     [Header("Session Settings")]
-    public int playerID;
-    public DifficultyLevel currentDifficulty;
+    [Tooltip("If true, use MainMenuManager values. If false, use Inspector values below")]
+    public bool useMainMenuSettings = true;
+    
+    [Tooltip("Fallback player ID if not using main menu")]
+    public int fallbackPlayerID = 1;
+    
+    [Tooltip("Fallback difficulty if not using main menu")]
+    public DifficultyLevel fallbackDifficulty = DifficultyLevel.Medium;
     
     [Header("References")]
     public GameObject player;
     public GameObject enemy;
+
+    // Active session settings
+    private int playerID;
+    public DifficultyLevel currentDifficulty { get; private set; }
 
     private float perfectDodgeWindow; // Time window after enemy attack starts
 
@@ -35,9 +45,38 @@ public class FightingGameSession : MonoBehaviour
 
     void Start()
     {
+        // Load settings from MainMenuManager or use fallback
+        LoadSessionSettings();
+        
         // Don't start session automatically
         // Will be started when enemy is spawned/activated
         initializeDodgeWindow(currentDifficulty);
+        
+        Debug.Log($"Fighting Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}");
+    }
+
+    void LoadSessionSettings()
+    {
+        if (useMainMenuSettings)
+        {
+            // Try to load from MainMenuManager
+            playerID = MainMenuManager.GetPlayerID();
+            currentDifficulty = MainMenuManager.GetDifficulty();
+            
+            // Validation: If MainMenuManager wasn't used (values are 0), use fallback
+            if (playerID == 0)
+            {
+                Debug.LogWarning("MainMenuManager values not found. Using fallback values.");
+                playerID = fallbackPlayerID;
+                currentDifficulty = fallbackDifficulty;
+            }
+        }
+        else
+        {
+            // Use Inspector values
+            playerID = fallbackPlayerID;
+            currentDifficulty = fallbackDifficulty;
+        }
     }
 
     void Update()
@@ -99,7 +138,7 @@ public class FightingGameSession : MonoBehaviour
         }
     }
 
-        void OnApplicationQuit()
+    void OnApplicationQuit()
     {
         if (!sessionActive || sessionEnded) return;
         EndSession(false, false);
@@ -238,17 +277,17 @@ public class FightingGameSession : MonoBehaviour
     void initializeDodgeWindow(DifficultyLevel difficulty)
     {
         if (difficulty == DifficultyLevel.Easy)
-            {
-                perfectDodgeWindow = 3.0f;
-            }
+        {
+            perfectDodgeWindow = 3.0f;
+        }
         else if (difficulty == DifficultyLevel.Medium)
-            {
-                perfectDodgeWindow = 2.0f;
-            }
-            else
-            {
-                perfectDodgeWindow = 1.0f;
-            }
+        {
+            perfectDodgeWindow = 2.0f;
+        }
+        else
+        {
+            perfectDodgeWindow = 1.0f;
+        }
     }
 }
 

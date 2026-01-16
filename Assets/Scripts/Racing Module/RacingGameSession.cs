@@ -4,13 +4,25 @@ using System.Collections.Generic;
 public class RacingGameSession : MonoBehaviour
 {
     [Header("Session Settings")]
-    public int playerID;
-    public DifficultyLevel currentDifficulty;
-    public int totalLaps;
+    [Tooltip("If true, use MainMenuManager values. If false, use Inspector values below")]
+    public bool useMainMenuSettings = true;
+    
+    [Tooltip("Fallback player ID if not using main menu")]
+    public int fallbackPlayerID = 1;
+    
+    [Tooltip("Fallback difficulty if not using main menu")]
+    public DifficultyLevel fallbackDifficulty = DifficultyLevel.Medium;
+    
+    [Tooltip("Number of laps to complete")]
+    public int totalLaps = 3;
 
     [Header("References")]
     public GameObject racecar;
     public GameObject checkpoint; // Single checkpoint reference
+
+    // Active session settings
+    private int playerID;
+    public DifficultyLevel currentDifficulty { get; private set; }
 
     // Session tracking
     private SessionData sessionData;
@@ -33,6 +45,9 @@ public class RacingGameSession : MonoBehaviour
 
     void Start()
     {
+        // Load settings from MainMenuManager or use fallback
+        LoadSessionSettings();
+        
         if (checkpoint == null)
         {
             Debug.LogError("No checkpoint assigned! Please add checkpoint GameObject to the reference.");
@@ -51,6 +66,32 @@ public class RacingGameSession : MonoBehaviour
         }
 
         StartCountdown();
+        
+        Debug.Log($"Racing Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}, Laps: {totalLaps}");
+    }
+
+    void LoadSessionSettings()
+    {
+        if (useMainMenuSettings)
+        {
+            // Try to load from MainMenuManager
+            playerID = MainMenuManager.GetPlayerID();
+            currentDifficulty = MainMenuManager.GetDifficulty();
+            
+            // Validation: If MainMenuManager wasn't used (values are 0), use fallback
+            if (playerID == 0)
+            {
+                Debug.LogWarning("MainMenuManager values not found. Using fallback values.");
+                playerID = fallbackPlayerID;
+                currentDifficulty = fallbackDifficulty;
+            }
+        }
+        else
+        {
+            // Use Inspector values
+            playerID = fallbackPlayerID;
+            currentDifficulty = fallbackDifficulty;
+        }
     }
 
     void StartCountdown()
@@ -126,7 +167,6 @@ public class RacingGameSession : MonoBehaviour
             if (speed > maxSpeedReached)
             {
                 maxSpeedReached = speed;
-                // Debug.Log("New max speed reached: " + maxSpeedReached);
             }
         }
     }
@@ -187,11 +227,6 @@ public class RacingGameSession : MonoBehaviour
     {
         if (!sessionActive || sessionEnded) return;
 
-        // foreach(float speed in speedSamples)
-        // {
-        //     Debug.Log(speed);
-        // }
-        
         sessionEnded = true;
         sessionActive = false;
 
@@ -242,8 +277,6 @@ public class RacingGameSession : MonoBehaviour
         {
             sum += value;
         }
-        // Debug.Log(sum);
-        // Debug.Log(values.Count);
         return sum / values.Count;
     }
 

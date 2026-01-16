@@ -10,9 +10,6 @@ public class EnemyController : MonoBehaviour
     public float attackRange = 2f;
     public float stoppingDistance = 1.8f;
     
-    [Header("Combat")]
-    public LayerMask playerLayer;
-    
     private float moveSpeed;
     private float attackWindupDuration;
     private float attackRecoveryDuration;
@@ -24,11 +21,11 @@ public class EnemyController : MonoBehaviour
     private Vector3 originalScale;
     private Coroutine currentAttackCoroutine; // Track the attack coroutine
     private Rigidbody rb;
-    private FightingGameSession gameSession;
+    private DifficultyLevel difficultyLevel;
 
     void Start()
     {
-        gameSession = FindFirstObjectByType<FightingGameSession>();
+        
         if (player != null)
         {
             playerHealth = player.GetComponent<Health>();
@@ -42,7 +39,10 @@ public class EnemyController : MonoBehaviour
         }
         
         originalScale = transform.localScale;
-        InitializeEnemy(gameSession.currentDifficulty);
+
+        difficultyLevel = MainMenuManager.GetDifficulty();
+        InitializeEnemy(difficultyLevel);
+        Debug.Log("Current enemy difficulty: " + difficultyLevel);
     }
 
     void Update()
@@ -161,30 +161,6 @@ public class EnemyController : MonoBehaviour
         isAttacking = false;
     }
 
-    // PUBLIC METHOD: Called when enemy takes damage (add this to Health.cs)
-    public void OnTakeDamage(int damage, Vector3 attackerPosition)
-    {
-        // Interrupt current attack if in progress
-        if (isAttacking && currentAttackCoroutine != null)
-        {
-            StopCoroutine(currentAttackCoroutine);
-            isAttacking = false;
-            
-            // Reset visual state
-            transform.localScale = originalScale;
-        }
-        
-        // Apply knockback - POP UP AND BACK!
-        if (rb != null)
-        {
-            Vector3 knockbackDirection = (transform.position - attackerPosition).normalized;
-            knockbackDirection.y = 0; // Keep horizontal direction
-            
-            // Apply force with both horizontal and upward components
-            Vector3 knockbackForce = knockbackDirection * 20f + Vector3.up * 20f; // Horizontal + upward
-            rb.AddForce(knockbackForce, ForceMode.Impulse);
-        }
-    }
 
     void InitializeEnemy(DifficultyLevel difficulty)
     {

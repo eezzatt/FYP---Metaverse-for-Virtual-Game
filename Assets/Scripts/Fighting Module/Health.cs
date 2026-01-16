@@ -18,11 +18,15 @@ public class Health : MonoBehaviour
     public UnityEvent<float> OnHealthChanged = new UnityEvent<float>();
 
     private FightingGameSession gameSession;
+    private DifficultyLevel difficultyLevel;
 
     void Start()
     {
         gameSession = FindFirstObjectByType<FightingGameSession>();
-        InitializeHealth(gameSession.currentDifficulty);
+
+        difficultyLevel = MainMenuManager.GetDifficulty();
+        InitializeHealth(difficultyLevel);
+        Debug.Log("Health difficulty: " + difficultyLevel);
 
         currentHealth = maxHealth;
         UpdateHealthBar();
