@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class FightingGameSession : MonoBehaviour
 {
@@ -17,11 +20,34 @@ public class FightingGameSession : MonoBehaviour
     public GameObject player;
     public GameObject enemy;
 
+    [Header("UI References")]
+    [Tooltip("Panel showing game controls")]
+    public GameObject controlsPanel;
+    public TMP_Text controlsText;
+    public Button controlsOkayButton;
+    
+    [Tooltip("Panel showing countdown")]
+    public GameObject countdownPanel;
+    public TMP_Text countdownText;
+    
+    [Tooltip("Panel showing results")]
+    public GameObject resultsPanel;
+    public TMP_Text resultsTitleText;
+    public TMP_Text durationText;
+    public TMP_Text accuracyText;
+    public TMP_Text combosText;
+    public TMP_Text dodgesText;
+    public TMP_Text hitsDealtText;
+    public TMP_Text hitsTakenText;
+    public TMP_Text scoreText;
+    public Button resultsOkayButton;
+
     // Active session settings
     private int playerID;
     public DifficultyLevel currentDifficulty { get; private set; }
 
-    private float perfectDodgeWindow; // Time window after enemy attack starts
+    private float perfectDodgeWindow;
+    private bool gameReady = false;
 
     // Session tracking
     private SessionData sessionData;
@@ -43,14 +69,27 @@ public class FightingGameSession : MonoBehaviour
     private bool enemyIsAttacking = false;
     private bool dodgeCounted;
 
+    // Countdown
+    private bool countdownActive = false;
+    private float countdownTimer = 3f;
+
     void Start()
     {
         // Load settings from MainMenuManager or use fallback
         LoadSessionSettings();
         
-        // Don't start session automatically
-        // Will be started when enemy is spawned/activated
+        // Initialize dodge window based on difficulty
         initializeDodgeWindow(currentDifficulty);
+        
+        // Setup button listeners
+        if (controlsOkayButton != null)
+            controlsOkayButton.onClick.AddListener(OnControlsOkayClicked);
+        
+        if (resultsOkayButton != null)
+            resultsOkayButton.onClick.AddListener(OnResultsOkayClicked);
+        
+        // Show controls panel and pause game
+        ShowControlsPanel();
         
         Debug.Log($"Fighting Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}");
     }
@@ -79,8 +118,72 @@ public class FightingGameSession : MonoBehaviour
         }
     }
 
+    void ShowControlsPanel()
+    {
+        HideAllPanels();
+        
+        if (controlsPanel != null)
+        {
+            controlsPanel.SetActive(true);
+        }
+        
+        if (controlsText != null)
+        {
+            controlsText.text = @"<size=50><b>FIGHTING GAME CONTROLS</b></size>
+
+<b>MOVEMENT:</b>
+• W / Up Arrow - Move Forward
+• S / Down Arrow - Move Backward
+• A / Left Arrow - Turn Left
+• D / Right Arrow - Turn Right
+• Space - Jump
+
+<b>COMBAT:</b>
+• Left Mouse Button - Attack
+• V Key - Dodge
+
+<b>OBJECTIVE:</b>
+Defeat the enemy by reducing their health to zero!
+Land combos for bonus points.
+Perfect dodges earn extra score.
+
+<b>TIP:</b>
+Watch for the enemy's attack windup to time your dodges perfectly!";
+        }
+        
+        SetGamePaused(true);
+    }
+
+    void OnControlsOkayClicked()
+    {
+        HideAllPanels();
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(true);
+        }
+        Debug.Log("Starting countdown...");
+        StartCountdown();
+    }
+
+    void StartCountdown()
+    {
+        countdownTimer = 3f;
+        countdownActive = true;
+        SetGamePaused(true);
+    }
+
     void Update()
     {
+        // Handle countdown
+        if (countdownActive)
+        {
+            UpdateCountdown();
+            return; // Don't run game logic during countdown
+        }
+
+        // Only run game logic if UI sequence is complete
+        if (!gameReady) return;
+
         // Check if we should start the session
         if (!sessionActive && !sessionEnded && enemy != null && player != null)
         {
@@ -106,11 +209,61 @@ public class FightingGameSession : MonoBehaviour
         {
             enemyIsAttacking = false;
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnApplicationQuit();
+        }
+    }
+
+    void UpdateCountdown()
+    {
+        countdownTimer -= Time.unscaledDeltaTime;
+
+        if (countdownText != null)
+        {
+            if (countdownTimer > 2f)
+            {
+                countdownText.text = "3";
+                countdownText.color = Color.red;
+            }
+            else if (countdownTimer > 1f)
+            {
+                countdownText.text = "2";
+                countdownText.color = Color.yellow;
+            }
+            else if (countdownTimer > 0f)
+            {
+                countdownText.text = "1";
+                countdownText.color = Color.green;
+            }
+            else if (!gameReady)
+            {
+                countdownText.text = "GO!";
+                countdownText.color = Color.green;
+                gameReady = true;
+                countdownActive = false;
+                Time.timeScale = 1f;
+                Invoke(nameof(StartGame), 1f);
+            }
+        }
+    }
+
+    void StartGame()
+    {    
+        Debug.Log("Testing");    
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(false);
+        }
+        
+        SetGamePaused(false);
+        Debug.Log("Game started!");
     }
 
     void StartSession()
     {
-        if (sessionActive || sessionEnded) return; // Prevent multiple starts
+        if (sessionActive || sessionEnded) return;
 
         sessionActive = true;
         sessionStartTime = Time.time;
@@ -130,7 +283,6 @@ public class FightingGameSession : MonoBehaviour
 
         if (playerHealth == null || enemyHealth == null) return;
 
-        // End session if either player or enemy is dead
         if (playerHealth.IsDead() || enemyHealth.IsDead())
         {
             bool victory = enemyHealth.IsDead();
@@ -146,7 +298,7 @@ public class FightingGameSession : MonoBehaviour
 
     public void EndSession(bool completed, bool victory)
     {
-        if (!sessionActive || sessionEnded) return; // Prevent multiple endings
+        if (!sessionActive || sessionEnded) return;
 
         sessionEnded = true;
         sessionActive = false;
@@ -175,6 +327,89 @@ public class FightingGameSession : MonoBehaviour
         GameplayDataCollector.Instance.SaveSessionData(sessionData);
 
         Debug.Log($"Fighting Game Session ENDED - Victory: {victory} | Duration: {duration:F2}s | Accuracy: {accuracy:F2} | Perfect Dodges: {perfectDodges} | Combos: {combosExecuted} | Avg Reaction: {avgReactionTime:F3}s");
+
+        // Show results panel
+        ShowResults(completed, victory, duration, accuracy);
+    }
+
+    void ShowResults(bool completed, bool victory, float duration, float accuracy)
+    {
+        HideAllPanels();
+        
+        if (resultsPanel != null)
+        {
+            resultsPanel.SetActive(true);
+        }
+
+        if (resultsTitleText != null)
+        {
+            if (completed)
+            {
+                resultsTitleText.text = victory ? "VICTORY!" : "DEFEAT";
+                resultsTitleText.color = victory ? Color.green : Color.red;
+            }
+            else
+            {
+                resultsTitleText.text = "DNF";
+                resultsTitleText.color = Color.grey;
+            }
+        }
+
+        if (durationText != null)
+            durationText.text = $"Duration: {duration:F1}s";
+
+        if (accuracyText != null)
+            accuracyText.text = $"Accuracy: {accuracy:P0}";
+
+        if (combosText != null)
+            combosText.text = $"Combos: {combosExecuted}";
+
+        if (dodgesText != null)
+            dodgesText.text = $"Perfect Dodges: {perfectDodges}";
+
+        if (hitsDealtText != null)
+            hitsDealtText.text = $"Hits Dealt: {hitsDealt}";
+
+        if (hitsTakenText != null)
+            hitsTakenText.text = $"Hits Taken: {hitsTaken}";
+
+        if (scoreText != null)
+            scoreText.text = $"Score: {sessionData.score}";
+
+        SetGamePaused(true);
+    }
+
+    void OnResultsOkayClicked()
+    {
+        Debug.Log("Returning to main menu...");
+        Time.timeScale = 1f; // Ensure time is unpaused before loading scene
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    void HideAllPanels()
+    {
+        if (controlsPanel != null) controlsPanel.SetActive(false);
+        if (countdownPanel != null) countdownPanel.SetActive(false);
+        if (resultsPanel != null) resultsPanel.SetActive(false);
+    }
+
+    void SetGamePaused(bool paused)
+    {        
+        // Disable/enable player and enemy controllers
+        if (player != null)
+        {
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            PlayerCombat playerCombat = player.GetComponent<PlayerCombat>();
+            
+            if (playerController != null) playerController.enabled = !paused;
+            if (playerCombat != null) playerCombat.enabled = !paused;
+        }
+
+        if (enemy != null)
+        {
+            EnemyController enemyController = enemy.GetComponent<EnemyController>();
+            if (enemyController != null) enemyController.enabled = !paused;
+        }
     }
 
     int CalculateScore(bool victory, float accuracy, float duration)
@@ -245,7 +480,6 @@ public class FightingGameSession : MonoBehaviour
         Debug.Log($"[SESSION] Reaction time recorded: {time:F3}s");
     }
 
-    // Called when enemy starts attacking
     public void OnEnemyAttackStart()
     {
         if (!sessionActive) return;
@@ -255,12 +489,10 @@ public class FightingGameSession : MonoBehaviour
         Debug.Log("[SESSION] Enemy attack started - dodge window open!");
     }
 
-    // Called by PlayerCombat when player dodges
     public void CheckPerfectDodge()
     {
         if (!sessionActive) return;
         
-        // Check if dodge happened during enemy attack window
         if (enemyIsAttacking && !dodgeCounted)
         {
             float reactionTime = Time.time - lastEnemyAttackTime;
@@ -291,7 +523,6 @@ public class FightingGameSession : MonoBehaviour
     }
 }
 
-// Extension method to calculate average
 public static class ListExtensions
 {
     public static float Average(this List<float> list)
