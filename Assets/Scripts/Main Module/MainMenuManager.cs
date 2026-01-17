@@ -166,7 +166,7 @@ public class MainMenuManager : MonoBehaviour
 
     void LoadGameScene(string gameType)
     {
-        string sceneToLoad = "";
+        string sceneToLoad;
         
         if (gameType == "Fighting Game")
         {
