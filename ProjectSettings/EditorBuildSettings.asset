@@ -8,12 +8,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MainLobby.unity
     guid: 3f7acfd816017c94a818831fa9a6a93f
   - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 72628acaeeb658641a6563475a62e48c
+  - enabled: 1
     path: Assets/Scenes/FightingGame.unity
     guid: 3b22d1021f272b04885ca73d51bd33a2
+  - enabled: 1
+    path: Assets/Scenes/RacingGame.unity
+    guid: afda5ba0fe77e9d46ba75ac8daf95a0d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

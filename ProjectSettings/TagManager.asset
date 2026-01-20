@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - Track
   - Obstacle
+  - Wall
+  - Wheel
   layers:
   - Default
   - TransparentFX
