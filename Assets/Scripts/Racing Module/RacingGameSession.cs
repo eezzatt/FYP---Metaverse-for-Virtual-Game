@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class RacingGameSession : MonoBehaviour
 {
@@ -20,9 +23,34 @@ public class RacingGameSession : MonoBehaviour
     public GameObject racecar;
     public GameObject checkpoint; // Single checkpoint reference
 
+    [Header("UI References")]
+    [Tooltip("Panel showing game controls")]
+    public GameObject controlsPanel;
+    public TMP_Text controlsText;
+    public Button controlsOkayButton;
+    
+    [Tooltip("Panel showing countdown")]
+    public GameObject countdownPanel;
+    public TMP_Text countdownText;
+    
+    [Tooltip("Panel showing results")]
+    public GameObject resultsPanel;
+    public TMP_Text resultsTitleText;
+    public TMP_Text lapsCompletedText;
+    public TMP_Text bestLapText;
+    public TMP_Text avgLapText;
+    public TMP_Text totalRaceText;
+    public TMP_Text collisionsText;
+    public TMP_Text maxSpeedText;
+    public TMP_Text avgSpeedText;
+    public TMP_Text consistencyText;
+    public TMP_Text scoreText;
+    public Button resultsOkayButton;
+
     // Active session settings
     private int playerID;
     public DifficultyLevel currentDifficulty { get; private set; }
+    private bool gameReady = false;
 
     // Session tracking
     private SessionData sessionData;
@@ -32,6 +60,11 @@ public class RacingGameSession : MonoBehaviour
     private bool raceStarted = false;
 
     // Racing metrics
+    private float totalDuration;
+    private float avgSpeed;
+    private float bestLapTime;
+    private float avgLapTime;
+    private float consistency;
     private int currentLap = 0;
     private List<float> lapTimes = new List<float>();
     private float currentLapStartTime;
@@ -40,7 +73,7 @@ public class RacingGameSession : MonoBehaviour
     private float maxSpeedReached = 0f;
 
     // Countdown
-    private float countdownTimer = 3f;
+    private float countdownTimer;
     internal bool isCountingDown;
 
     void Start()
@@ -65,8 +98,14 @@ public class RacingGameSession : MonoBehaviour
             Debug.Log($"Checkpoint found: {checkpoint.name}");
         }
 
-        StartCountdown();
+        if (controlsOkayButton != null)
+            controlsOkayButton.onClick.AddListener(OnControlsOkayClicked);
         
+        if (resultsOkayButton != null)
+            resultsOkayButton.onClick.AddListener(OnResultsOkayClicked);
+
+        ShowControlsPanel();
+
         Debug.Log($"Racing Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}, Laps: {totalLaps}");
     }
 
@@ -94,10 +133,54 @@ public class RacingGameSession : MonoBehaviour
         }
     }
 
+
+    void ShowControlsPanel()
+    {
+        HideAllPanels();
+        
+        if (controlsPanel != null)
+        {
+            controlsPanel.SetActive(true);
+        }
+        
+        if (controlsText != null)
+        {
+            controlsText.text = @"<size=50><b>RACING GAME CONTROLS</b></size>
+
+<b>MOVEMENT:</b>
+• W / Up Arrow - Move Forward
+• S / Down Arrow - Brake
+• A / Left Arrow - Turn Left
+• D / Right Arrow - Turn Right
+
+<b>OBJECTIVE:</b>
+Race around the tracks and complete 3 laps as fast as possible!
+Avoid colliding with the walls or obstacles.
+
+<b>TIP:</b>
+Slow down when approaching the obstacles to maneuvre around them!";
+        }
+        
+        SetGamePaused(true);
+    }
+
+    void OnControlsOkayClicked()
+    {
+        Debug.Log("Control button clicked");
+        HideAllPanels();
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(true);
+        }
+        Debug.Log("Starting countdown...");
+        StartCountdown();
+    }
+
     void StartCountdown()
     {
+        countdownTimer = 3f;
         isCountingDown = true;
-        Debug.Log("Race starting in 3...");
+        SetGamePaused(true);
     }
 
     void Update()
@@ -105,21 +188,7 @@ public class RacingGameSession : MonoBehaviour
         // Handle countdown
         if (isCountingDown)
         {
-            countdownTimer -= Time.deltaTime;
-            
-            if (countdownTimer <= 2f && countdownTimer > 1f)
-            {
-                Debug.Log("2...");
-            }
-            else if (countdownTimer <= 1f && countdownTimer > 0f)
-            {
-                Debug.Log("1...");
-            }
-            else if (countdownTimer <= 0f)
-            {
-                isCountingDown = false;
-                StartRace();
-            }
+            UpdateCountdown();
             return;
         }
 
@@ -132,13 +201,53 @@ public class RacingGameSession : MonoBehaviour
         // Allow player to quit race with ESC key
         if (sessionActive && !sessionEnded && Input.GetKeyDown(KeyCode.Escape))
         {
+            OnApplicationQuit();
             QuitRace();
+        }
+    }
+
+    void UpdateCountdown()
+    {
+        countdownTimer -= Time.unscaledDeltaTime;
+
+        if (countdownText != null)
+        {
+            if (countdownTimer > 2f)
+            {
+                countdownText.text = "3";
+                countdownText.color = Color.red;
+            }
+            else if (countdownTimer > 1f)
+            {
+                countdownText.text = "2";
+                countdownText.color = Color.yellow;
+            }
+            else if (countdownTimer > 0f)
+            {
+                countdownText.text = "1";
+                countdownText.color = Color.green;
+            }
+            else if (!gameReady)
+            {
+                countdownText.text = "GO!";
+                countdownText.color = Color.green;
+                gameReady = true;
+                isCountingDown = false;
+                Invoke(nameof(StartRace), 1f);
+            }
         }
     }
 
     void StartRace()
     {
         if (raceStarted) return;
+
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(false);
+        }
+
+        SetGamePaused(false);
 
         raceStarted = true;
         sessionActive = true;
@@ -230,11 +339,11 @@ public class RacingGameSession : MonoBehaviour
         sessionEnded = true;
         sessionActive = false;
 
-        float totalDuration = Time.time - sessionStartTime;
-        float avgSpeed = speedSamples.Count > 0 ? CalculateAverage(speedSamples) : 0f;
-        float bestLapTime = lapTimes.Count > 0 ? Mathf.Min(lapTimes.ToArray()) : 0f;
-        float avgLapTime = lapTimes.Count > 0 ? CalculateAverage(lapTimes) : 0f;
-        float consistency = CalculateConsistency(lapTimes);
+        totalDuration = Time.time - sessionStartTime;
+        avgSpeed = speedSamples.Count > 0 ? CalculateAverage(speedSamples) : 0f;
+        bestLapTime = lapTimes.Count > 0 ? Mathf.Min(lapTimes.ToArray()) : 0f;
+        avgLapTime = lapTimes.Count > 0 ? CalculateAverage(lapTimes) : 0f;
+        consistency = CalculateConsistency(lapTimes);
 
         // Populate session data
         sessionData.sessionDuration = totalDuration;
@@ -256,6 +365,60 @@ public class RacingGameSession : MonoBehaviour
         GameplayDataCollector.Instance.SaveSessionData(sessionData);
 
         Debug.Log($"Race ENDED - Completed: {completed} | Laps: {currentLap - 1}/{totalLaps} | Best Lap: {bestLapTime:F2}s");
+
+        ShowResults(completed);
+    }
+
+    void ShowResults(bool completed)
+    {
+        HideAllPanels();
+        
+        if (resultsPanel != null)
+        {
+            resultsPanel.SetActive(true);
+        }
+
+        if (resultsTitleText != null)
+        {
+            resultsTitleText.text = completed ? "COMPLETED!" : "DNF";
+            resultsTitleText.color = completed ? Color.green : Color.red;
+        }
+
+        if (lapsCompletedText != null)
+            lapsCompletedText.text = $"Laps Completed: {currentLap - 1:0.00}";
+
+        if (bestLapText != null)
+            bestLapText.text = $"Best Lap: {bestLapTime:0.00}";
+
+        if (avgLapText != null)
+            avgLapText.text = $"Avg Lap: {avgLapTime:0.00}";
+
+        if (totalRaceText != null)
+            totalRaceText.text = $"Duration: {totalDuration:0.00}";
+
+        if (collisionsText != null)
+            collisionsText.text = $"Collisions: {collisionCount}";
+
+        if (maxSpeedText != null)
+            maxSpeedText.text = $"Max speed: {maxSpeedReached:0.00}";
+
+        if (avgSpeedText != null)
+        avgSpeedText.text = $"Avg Speed: {avgSpeed:0.00}";
+
+        if (consistencyText != null)
+        consistencyText.text = $"Consistency: {consistency:0.00}";
+
+        if (scoreText != null)
+            scoreText.text = $"Score: {sessionData.score}";
+
+        SetGamePaused(true);
+    }
+
+    void OnResultsOkayClicked()
+    {
+        Debug.Log("Returning to main menu...");
+        Time.timeScale = 1f; // Ensure time is unpaused before loading scene
+        SceneManager.LoadScene("MainMenu");
     }
 
     int CalculateScore(bool completed, float bestLapTime, int collisions)
@@ -317,6 +480,23 @@ public class RacingGameSession : MonoBehaviour
         {
             Debug.LogWarning("Application quitting - saving partial race data");
             EndRace(false);
+        }
+    }
+
+    void HideAllPanels()
+    {
+        if (controlsPanel != null) controlsPanel.SetActive(false);
+        if (countdownPanel != null) countdownPanel.SetActive(false);
+        if (resultsPanel != null) resultsPanel.SetActive(false);
+    }
+
+    void SetGamePaused(bool paused)
+    {        
+        // Disable/enable player and enemy controllers
+        if (racecar != null)
+        {
+            RaceCarController carController = racecar.GetComponent<RaceCarController>();
+            if (carController != null) carController.enabled = !paused;
         }
     }
 }

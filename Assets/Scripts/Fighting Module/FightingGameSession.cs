@@ -47,7 +47,6 @@ public class FightingGameSession : MonoBehaviour
     public DifficultyLevel currentDifficulty { get; private set; }
 
     private float perfectDodgeWindow;
-    private bool gameReady = false;
 
     // Session tracking
     private SessionData sessionData;
@@ -181,9 +180,6 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
             return; // Don't run game logic during countdown
         }
 
-        // Only run game logic if UI sequence is complete
-        if (!gameReady) return;
-
         // Check if we should start the session
         if (!sessionActive && !sessionEnded && enemy != null && player != null)
         {
@@ -237,21 +233,18 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
                 countdownText.text = "1";
                 countdownText.color = Color.green;
             }
-            else if (!gameReady)
+            else
             {
                 countdownText.text = "GO!";
                 countdownText.color = Color.green;
-                gameReady = true;
                 countdownActive = false;
-                Time.timeScale = 1f;
                 Invoke(nameof(StartGame), 1f);
             }
         }
     }
 
     void StartGame()
-    {    
-        Debug.Log("Testing");    
+    {       
         if (countdownPanel != null)
         {
             countdownPanel.SetActive(false);
@@ -382,7 +375,6 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
     void OnResultsOkayClicked()
     {
         Debug.Log("Returning to main menu...");
-        Time.timeScale = 1f; // Ensure time is unpaused before loading scene
         SceneManager.LoadScene("MainMenu");
     }
 

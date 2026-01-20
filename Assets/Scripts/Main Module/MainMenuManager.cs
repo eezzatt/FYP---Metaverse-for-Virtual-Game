@@ -93,7 +93,7 @@ public class MainMenuManager : MonoBehaviour
             "Hard"
         });
         
-        difficultyDropdown.value = 0;
+        difficultyDropdown.value = 1;
     }
 
     void OnStartGameClicked()
