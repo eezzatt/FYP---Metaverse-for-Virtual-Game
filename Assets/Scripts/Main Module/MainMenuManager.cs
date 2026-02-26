@@ -40,6 +40,7 @@ public class MainMenuManager : MonoBehaviour
     public static int SelectedPlayerID { get; private set; }
     public static DifficultyLevel SelectedDifficulty { get; private set; }
     public static string SelectedGameType { get; private set; }
+    private static bool _isNextRound = false;
 
     void Start()
     {
@@ -245,6 +246,21 @@ public class MainMenuManager : MonoBehaviour
     public static DifficultyLevel GetDifficulty()
     {
         return SelectedDifficulty;
+    }
+
+    public static void SetDifficulty(DifficultyLevel difficulty)
+    {
+        SelectedDifficulty = difficulty;
+    }
+
+    public static void SetIsNextRound(bool value)
+    {
+        _isNextRound = value;
+    }
+
+    public static bool GetIsNextRound()
+    {
+        return _isNextRound;
     }
 
     // Helper method to get the stored game type (call this from other scripts)
