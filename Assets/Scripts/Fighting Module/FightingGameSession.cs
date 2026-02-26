@@ -40,7 +40,7 @@ public class FightingGameSession : MonoBehaviour
     public TMP_Text hitsDealtText;
     public TMP_Text hitsTakenText;
     public TMP_Text scoreText;
-    public Button resultsOkayButton;
+    public Button XAIRecommendationButton;
 
     // Active session settings
     private int playerID;
@@ -84,13 +84,55 @@ public class FightingGameSession : MonoBehaviour
         if (controlsOkayButton != null)
             controlsOkayButton.onClick.AddListener(OnControlsOkayClicked);
         
-        if (resultsOkayButton != null)
-            resultsOkayButton.onClick.AddListener(OnResultsOkayClicked);
+        if (XAIRecommendationButton != null)
+            XAIRecommendationButton.onClick.AddListener(OnXAIRecommendationClicked);
         
         // Show controls panel and pause game
         ShowControlsPanel();
         
         Debug.Log($"Fighting Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}");
+    }
+
+
+    void Update()
+    {
+        // Handle countdown
+        if (countdownActive)
+        {
+            UpdateCountdown();
+            return; // Don't run game logic during countdown
+        }
+
+        // Check if we should start the session
+        if (!sessionActive && !sessionEnded && enemy != null && player != null)
+        {
+            // Check if both player and enemy are alive
+            Health playerHealth = player.GetComponent<Health>();
+            Health enemyHealth = enemy.GetComponent<Health>();
+
+            if (playerHealth != null && !playerHealth.IsDead() && 
+                enemyHealth != null && !enemyHealth.IsDead())
+            {
+                StartSession();
+            }
+        }
+
+        // Check for session end conditions
+        if (sessionActive && !sessionEnded)
+        {
+            CheckSessionEnd();
+        }
+        
+        // Reset enemy attack flag after window expires
+        if (enemyIsAttacking && Time.time - lastEnemyAttackTime > perfectDodgeWindow)
+        {
+            enemyIsAttacking = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnApplicationQuit();
+        }
     }
 
     void LoadSessionSettings()
@@ -171,46 +213,6 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
         SetGamePaused(true);
     }
 
-    void Update()
-    {
-        // Handle countdown
-        if (countdownActive)
-        {
-            UpdateCountdown();
-            return; // Don't run game logic during countdown
-        }
-
-        // Check if we should start the session
-        if (!sessionActive && !sessionEnded && enemy != null && player != null)
-        {
-            // Check if both player and enemy are alive
-            Health playerHealth = player.GetComponent<Health>();
-            Health enemyHealth = enemy.GetComponent<Health>();
-
-            if (playerHealth != null && !playerHealth.IsDead() && 
-                enemyHealth != null && !enemyHealth.IsDead())
-            {
-                StartSession();
-            }
-        }
-
-        // Check for session end conditions
-        if (sessionActive && !sessionEnded)
-        {
-            CheckSessionEnd();
-        }
-        
-        // Reset enemy attack flag after window expires
-        if (enemyIsAttacking && Time.time - lastEnemyAttackTime > perfectDodgeWindow)
-        {
-            enemyIsAttacking = false;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            OnApplicationQuit();
-        }
-    }
 
     void UpdateCountdown()
     {
@@ -332,6 +334,11 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
         if (resultsPanel != null)
         {
             resultsPanel.SetActive(true);
+            bool wasNextRound = MainMenuManager.GetIsNextRound();
+            MainMenuManager.SetIsNextRound(false); // reset before any reads below is wrong — move here but use wasNextRound
+
+            if (XAIRecommendationButton != null)
+                XAIRecommendationButton.gameObject.SetActive(!wasNextRound);
         }
 
         if (resultsTitleText != null)
@@ -372,10 +379,11 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
         SetGamePaused(true);
     }
 
-    void OnResultsOkayClicked()
+    void OnXAIRecommendationClicked()
     {
-        Debug.Log("Returning to main menu...");
-        SceneManager.LoadScene("MainMenu");
+        HideAllPanels();
+        Debug.Log("Displaying XAI Recommendation");
+        GetComponent<MLDifficultyClient>()?.RequestPrediction(sessionData);
     }
 
     void HideAllPanels()
@@ -402,6 +410,11 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
             EnemyController enemyController = enemy.GetComponent<EnemyController>();
             if (enemyController != null) enemyController.enabled = !paused;
         }
+    }
+
+    void BackToLobby()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 
     int CalculateScore(bool victory, float accuracy, float duration)
