@@ -45,7 +45,7 @@ public class RacingGameSession : MonoBehaviour
     public TMP_Text avgSpeedText;
     public TMP_Text consistencyText;
     public TMP_Text scoreText;
-    public Button resultsOkayButton;
+    public Button XAIRecommendationButton;
 
     // Active session settings
     private int playerID;
@@ -101,9 +101,8 @@ public class RacingGameSession : MonoBehaviour
         if (controlsOkayButton != null)
             controlsOkayButton.onClick.AddListener(OnControlsOkayClicked);
         
-        if (resultsOkayButton != null)
-            resultsOkayButton.onClick.AddListener(OnResultsOkayClicked);
-
+        if (XAIRecommendationButton != null)
+            XAIRecommendationButton.onClick.AddListener(OnXAIRecommendationClicked);
         ShowControlsPanel();
 
         Debug.Log($"Racing Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}, Laps: {totalLaps}");
@@ -414,11 +413,11 @@ Slow down when approaching the obstacles to maneuvre around them!";
         SetGamePaused(true);
     }
 
-    void OnResultsOkayClicked()
+    void OnXAIRecommendationClicked()
     {
-        Debug.Log("Returning to main menu...");
-        Time.timeScale = 1f; // Ensure time is unpaused before loading scene
-        SceneManager.LoadScene("MainMenu");
+        HideAllPanels();
+        Debug.Log("Displaying XAI Recommendation");
+        GetComponent<MLDifficultyClient>()?.RequestPrediction(sessionData);
     }
 
     int CalculateScore(bool completed, float bestLapTime, int collisions)
