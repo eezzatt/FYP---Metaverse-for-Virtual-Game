@@ -1,0 +1,7 @@
+sessionID,playerID,gameType,difficultyLevel,sessionDuration,score,deaths,completed,timestamp,victory,combosExecuted,perfectDodges,hitsDealt,hitsTaken,playerAccuracy,avgReactionTime
+6c677516-5dc0-48e5-9017-586c2e4ce0aa,1,Fighting,Medium,22.65,800,1,True,2026-02-26 12:34:15,False,0,0,2,10,1,0
+54b403a7-c227-410c-af8c-2af407d76ebb,1,Fighting,Medium,23.68,300,1,True,2026-02-26 12:40:58,False,0,0,0,10,0,0
+05d34a46-2646-497d-b114-14cc5946a407,1,Fighting,Medium,23.60,300,1,True,2026-02-26 12:46:46,False,0,0,0,10,0,0
+b839d88e-7023-45c5-94c4-9500343b014e,1,Fighting,Medium,23.46,675,1,True,2026-02-26 12:53:42,False,0,0,3,10,0.75,0
+e613ea49-4d2a-48a1-907f-dea59087d2c3,1,Fighting,Medium,24.81,925,1,True,2026-02-26 13:04:49,False,1,2,3,10,0.75,0.2289014
+3eb92ceb-28a8-4714-9036-127fc4701d89,1,Fighting,Medium,21.34,2233,0,True,2026-02-26 13:05:33,True,10,0,13,1,0.8666667,0
