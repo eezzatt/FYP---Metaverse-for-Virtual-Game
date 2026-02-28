@@ -41,6 +41,7 @@ public class FightingGameSession : MonoBehaviour
     public TMP_Text hitsTakenText;
     public TMP_Text scoreText;
     public Button XAIRecommendationButton;
+    public Button backToLobbyButton;
 
     // Active session settings
     private int playerID;
@@ -86,6 +87,12 @@ public class FightingGameSession : MonoBehaviour
         
         if (XAIRecommendationButton != null)
             XAIRecommendationButton.onClick.AddListener(OnXAIRecommendationClicked);
+
+        if (backToLobbyButton != null)
+        {
+            backToLobbyButton.onClick.AddListener(OnBackToLobbyClicked);
+            backToLobbyButton.gameObject.SetActive(false);
+        }
         
         // Show controls panel and pause game
         ShowControlsPanel();
@@ -335,10 +342,37 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
         {
             resultsPanel.SetActive(true);
             bool wasNextRound = MainMenuManager.GetIsNextRound();
-            MainMenuManager.SetIsNextRound(false); // reset before any reads below is wrong — move here but use wasNextRound
 
-            if (XAIRecommendationButton != null)
-                XAIRecommendationButton.gameObject.SetActive(!wasNextRound);
+            if (!wasNextRound)
+            {
+                if(XAIRecommendationButton != null)
+                {
+                    XAIRecommendationButton.gameObject.SetActive(true);
+                }
+
+                if (backToLobbyButton != null)
+                {
+                    backToLobbyButton.gameObject.SetActive(false);
+                }
+
+                MainMenuManager.SetIsNextRound(true);
+            }
+
+            else
+            {
+                if(XAIRecommendationButton != null)
+                {
+                    XAIRecommendationButton.gameObject.SetActive(false);
+                }
+
+                if (backToLobbyButton != null)
+                {
+                    backToLobbyButton.gameObject.SetActive(true);
+                }
+
+                MainMenuManager.SetIsNextRound(false);
+            }
+            
         }
 
         if (resultsTitleText != null)
@@ -386,6 +420,11 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
         GetComponent<MLDifficultyClient>()?.RequestPrediction(sessionData);
     }
 
+    void OnBackToLobbyClicked()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
     void HideAllPanels()
     {
         if (controlsPanel != null) controlsPanel.SetActive(false);
@@ -412,10 +451,6 @@ Watch for the enemy's attack windup to time your dodges perfectly!";
         }
     }
 
-    void BackToLobby()
-    {
-        SceneManager.LoadScene("MainMenu");
-    }
 
     int CalculateScore(bool victory, float accuracy, float duration)
     {

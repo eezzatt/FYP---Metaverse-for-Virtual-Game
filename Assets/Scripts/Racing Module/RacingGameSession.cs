@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class RacingGameSession : MonoBehaviour
 {
@@ -46,6 +47,7 @@ public class RacingGameSession : MonoBehaviour
     public TMP_Text consistencyText;
     public TMP_Text scoreText;
     public Button XAIRecommendationButton;
+    public Button backToLobbyButton;
 
     // Active session settings
     private int playerID;
@@ -103,6 +105,11 @@ public class RacingGameSession : MonoBehaviour
         
         if (XAIRecommendationButton != null)
             XAIRecommendationButton.onClick.AddListener(OnXAIRecommendationClicked);
+
+        if (backToLobbyButton != null)
+            backToLobbyButton.onClick.AddListener(OnBackToLobbyClicked);
+            backToLobbyButton.gameObject.SetActive(false);
+
         ShowControlsPanel();
 
         Debug.Log($"Racing Game Session initialized - Player ID: {playerID}, Difficulty: {currentDifficulty}, Laps: {totalLaps}");
@@ -375,6 +382,38 @@ Slow down when approaching the obstacles to maneuvre around them!";
         if (resultsPanel != null)
         {
             resultsPanel.SetActive(true);
+            bool wasNextRound = MainMenuManager.GetIsNextRound();
+
+            if (!wasNextRound)
+            {
+                if(XAIRecommendationButton != null)
+                {
+                    XAIRecommendationButton.gameObject.SetActive(true);
+                }
+
+                if (backToLobbyButton != null)
+                {
+                    backToLobbyButton.gameObject.SetActive(false);
+                }
+
+                MainMenuManager.SetIsNextRound(true);
+            }
+
+            else
+            {
+                if(XAIRecommendationButton != null)
+                {
+                    XAIRecommendationButton.gameObject.SetActive(false);
+                }
+
+                if (backToLobbyButton != null)
+                {
+                    backToLobbyButton.gameObject.SetActive(true);
+                }
+
+                MainMenuManager.SetIsNextRound(false);
+            }
+            
         }
 
         if (resultsTitleText != null)
@@ -420,6 +459,11 @@ Slow down when approaching the obstacles to maneuvre around them!";
         GetComponent<MLDifficultyClient>()?.RequestPrediction(sessionData);
     }
 
+    void OnBackToLobbyClicked()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    
     int CalculateScore(bool completed, float bestLapTime, int collisions)
     {
         if (!completed) return 0;
