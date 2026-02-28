@@ -1,7 +1,20 @@
-sessionID,playerID,gameType,difficultyLevel,sessionDuration,score,deaths,completed,timestamp,victory,combosExecuted,perfectDodges,hitsDealt,hitsTaken,playerAccuracy,avgReactionTime
-6c677516-5dc0-48e5-9017-586c2e4ce0aa,1,Fighting,Medium,22.65,800,1,True,2026-02-26 12:34:15,False,0,0,2,10,1,0
-54b403a7-c227-410c-af8c-2af407d76ebb,1,Fighting,Medium,23.68,300,1,True,2026-02-26 12:40:58,False,0,0,0,10,0,0
-05d34a46-2646-497d-b114-14cc5946a407,1,Fighting,Medium,23.60,300,1,True,2026-02-26 12:46:46,False,0,0,0,10,0,0
-b839d88e-7023-45c5-94c4-9500343b014e,1,Fighting,Medium,23.46,675,1,True,2026-02-26 12:53:42,False,0,0,3,10,0.75,0
-e613ea49-4d2a-48a1-907f-dea59087d2c3,1,Fighting,Medium,24.81,925,1,True,2026-02-26 13:04:49,False,1,2,3,10,0.75,0.2289014
-3eb92ceb-28a8-4714-9036-127fc4701d89,1,Fighting,Medium,21.34,2233,0,True,2026-02-26 13:05:33,True,10,0,13,1,0.8666667,0
+sessionID,playerID,gameType,difficultyLevel,sessionDuration,score,deaths,completed,timestamp,victory,combosExecuted,perfectDodges,hitsDealt,hitsTaken,playerAccuracy,avgReactionTime,lapsCompleted,bestLapTime,avgLapTime,totalRaceTime,collisions,maxSpeed,avgSpeed,consistency
+6c677516-5dc0-48e5-9017-586c2e4ce0aa,1,Fighting,Medium,22.65,800,1,True,2026-02-26 12:34:15,False,0,0,2,10,1,0,,,,,,,,
+54b403a7-c227-410c-af8c-2af407d76ebb,1,Fighting,Medium,23.68,300,1,True,2026-02-26 12:40:58,False,0,0,0,10,0,0,,,,,,,,
+05d34a46-2646-497d-b114-14cc5946a407,1,Fighting,Medium,23.60,300,1,True,2026-02-26 12:46:46,False,0,0,0,10,0,0,,,,,,,,
+b839d88e-7023-45c5-94c4-9500343b014e,1,Fighting,Medium,23.46,675,1,True,2026-02-26 12:53:42,False,0,0,3,10,0.75,0,,,,,,,,
+e613ea49-4d2a-48a1-907f-dea59087d2c3,1,Fighting,Medium,24.81,925,1,True,2026-02-26 13:04:49,False,1,2,3,10,0.75,0.2289014,,,,,,,,
+3eb92ceb-28a8-4714-9036-127fc4701d89,1,Fighting,Medium,21.34,2233,0,True,2026-02-26 13:05:33,True,10,0,13,1,0.8666667,0,,,,,,,,
+7bb2d542-b2e6-401a-82b4-cb337f6f5204,1,Racing,Medium,118.72,900,0,True,2026-02-26 13:25:08,,,,,,,,3,39.03999,39.57216,118.7165,4,40,39.04167,0.9859957
+85cf706f-6c15-40fb-b27e-e6c4610a647f,1,Racing,Medium,117.21,900,0,True,2026-02-26 13:31:20,,,,,,,,3,38.39999,39.07101,117.213,4,40,39.21465,0.9827452
+743a5a7f-0b52-49cb-80aa-0baad0c8269e,1,Racing,Medium,116.66,850,0,True,2026-02-26 14:28:22,,,,,,,,3,38.5,38.88585,116.6575,5,40,39.50876,0.9893937
+ae1bfa37-1b69-430a-9173-e13b0b8e8c5b,1,Fighting,Medium,24.60,2083,0,True,2026-02-28 15:05:44,True,7,0,13,1,0.8666667,0,,,,,,,,
+86c4c281-c686-49dd-9cd0-4baaf55a62fc,1,Fighting,Medium,22.77,2264,0,True,2026-02-28 15:08:48,True,10,0,13,0,0.9285714,0,,,,,,,,
+714a8050-966f-4d83-955b-97f78a863c8a,1,Fighting,Hard,42.26,2405,0,True,2026-02-28 15:09:33,True,14,1,20,3,0.9090909,0.2039719,,,,,,,,
+e6bf553a-dde6-414b-8365-c4ea5a3618f0,1,Racing,Medium,115.80,850,0,True,2026-02-28 15:12:02,,,,,,,,3,38.31999,38.59951,115.7985,5,40,39.63678,0.9944655
+c9e587dc-c828-46db-9f6b-5c8c300c8e96,1,Racing,Medium,116.90,900,0,True,2026-02-28 15:14:32,,,,,,,,3,38.63998,38.96566,116.897,4,40,39.4404,0.9902758
+12a0b371-b4a8-403f-b1cb-8923c4ef631f,1,Fighting,Medium,19.65,850,0,False,2026-02-28 16:01:11,False,1,0,2,5,1,0,,,,,,,,
+07c95491-10cb-4c4a-80a8-aaf70a120663,1,Fighting,Medium,31.40,1100,1,True,2026-02-28 16:02:03,False,5,2,6,10,1,0.304924,,,,,,,,
+da8a1c8f-cd2f-4a44-9220-27c205363b23,1,Fighting,Easy,17.51,2000,0,True,2026-02-28 16:02:24,True,4,0,10,3,1,0,,,,,,,,
+94552e33-ed99-42dc-b644-a2bdce492839,1,Racing,Medium,117.86,650,0,True,2026-02-28 16:04:36,,,,,,,,3,38.62,39.28624,117.8587,9,40,39.19094,0.9849116
+57ff61c8-4b23-42c6-8ee5-ed9f1ca2f425,1,Racing,Medium,120.84,0,0,True,2026-02-28 16:06:46,,,,,,,,3,39.25763,40.2792,120.8376,22,40,38.09473,0.9748479
